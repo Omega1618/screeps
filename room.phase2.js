@@ -1,0 +1,223 @@
+// TODO this code is totally not done.
+
+/**
+ * 
+ * Maintain a low priority queue for transports and a high priority queue for transports to gather from
+ * Also maintain a high and low priority queue to send things to.
+ * 
+ * Also maintain a list of which sources are being mined from and which need to be minded from
+ * 
+ **/
+
+var roleBuilder = require('creep.phase2.static_builder');
+var roleMiner = require('creep.phase2.drop_miner');
+var roleDefender = require('creep.phase2.melee_defender');
+var roleTransport = require('creep.phase2.transport');
+var roleUpgrader = require('creep.phase2.static_upgrader');
+var roleRepairer = require('creep.phase2.repairer');
+var roleRecycler = require('creep.recycler');
+
+var MultiQueue = require('utilities.queue');
+var Make_Transport_Request = require("utilities.transport_request");
+var callback_util = require('utilities.call_back');
+
+var constants = require('creep.constants');
+var util = require("room.utilities");
+var base_lib = require("room.base_position");
+
+
+/**
+var renew_request_callback_fn_id = callback_util.register_callback_fn( function(request) {
+    var new_request = Make_Transport_Request();
+    new_request.source = request.source;
+    new_request.source_type = request.source_type;
+    new_request.target = request.target;
+    new_request.type = request.type;
+    // TODO need to renew callback
+    new_request.start_callback = request.start_callback;
+    new_request.end_callback = request.end_callback;
+    
+    var is_source = request.target === undefined;
+    var room = null;
+    if (is_source) {
+        if(constants.TRANSPORT_SOURCE_TYPES.POSITION == request.source_type) {
+            room = Game.rooms[request.source.roomName];
+        } else {
+            room = request.source.room;
+        }
+    } else {
+        room = request.target.room;
+    }
+             
+    
+    util.add_to_transport_queue(room, 0, new_request, is_source);
+});
+**/
+
+var start_phase = function(room) {
+    // data structure to keep track of miners at each source.
+    var has_drop_miner = {};
+    var source_delay = {};
+    var sources = room.find(FIND_SOURCES);
+    var source_keepers = room.find(FIND_STRUCTURES, {
+        filter: { structureType: STRUCTURE_KEEPER_LAIR }
+    });
+    source_keepers.forEach(function(sk){
+        var unsafe_source = sk.pos.findClosestByRange(FIND_SOURCES);
+        sources = _.filter(sources, function(s){ return s.id != unsafe_source.id;});
+    });
+    sources.forEach(function(source) {
+        has_drop_miner[source.id] = false;
+        source_delay[source.id] = 0;
+    });
+    room.memory[constants.DROP_MINER_TRACKER] = has_drop_miner;
+    room.memory[constants.SAFE_SOURCES] = sources.map(function(s){return s.id;});
+    
+    var t_queues = {};
+    t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.SOURCE] = MultiQueue.make();
+    t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET] = MultiQueue.make();
+    room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES] = t_queues;
+    room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST] = {};
+    
+    room.memory[constants.NUM_DROP_MINERS] = 0;
+    room.memory[constants.NUM_STATIC_BUILDER] = 0;
+    room.memory[constants.NUM_MELEE_DEFENDER] = 0;
+    room.memory[constants.NUM_STATIC_UPGRADER] = 0;
+    room.memory[constants.NUM_TRANSPORT] = 0;
+    room.memory[constants.NUM_REPAIRER] = 0;
+};
+
+var end_phase = function(room) {
+    delete room.memory[constants.DROP_MINER_TRACKER];
+    delete room.memory[constants.SAFE_SOURCES];
+    
+    delete room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
+    delete room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST];
+    
+    delete room.memory[constants.NUM_DROP_MINERS];
+    delete room.memory[constants.NUM_STATIC_BUILDER];
+    delete room.memory[constants.NUM_MELEE_DEFENDER];
+    delete room.memory[constants.NUM_STATIC_UPGRADER];
+    delete room.memory[constants.NUM_TRANSPORT];
+    delete room.memory[constants.NUM_REPAIRER];
+};
+
+var try_spawn = function(room) {
+    // TODO when to spawn melee defenders
+    var ae = room.energyAvailable;
+    var ac = room.energyCapacityAvailable;
+    
+    if (room.memory[constants.NUM_TRANSPORT] < 1) {
+        return util.spawn_creep(room, roleTransport, 100);
+    }
+    
+    if (room.memory[constants.NUM_DROP_MINERS] <  1) {
+        return util.spawn_creep(room, roleMiner, ae);
+    }
+    
+    if (room.memory[constants.NUM_TRANSPORT] == 1 && room.memory[constants.NUM_DROP_MINERS] > 1) {
+        return util.spawn_creep(room, roleTransport, 200);
+    }
+    
+    if (ac - ae > 0) {
+        return ERR_NOT_ENOUGH_ENERGY;
+    }
+    
+    if (room.memory[constants.NUM_DROP_MINERS] <  room.memory[constants.SAFE_SOURCES].length) {
+        return util.spawn_creep(room, roleMiner, ae);
+    }
+    
+    var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
+    var queue_length = MultiQueue.getLength(t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.SOURCE]) + MultiQueue.getLength(t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET]);
+    var total_sources = room.memory[constants.NUM_DROP_MINERS] + room.memory[constants.NUM_STATIC_UPGRADER] + room.memory[constants.NUM_STATIC_BUILDER] * 0.75 + queue_length * 0.1;
+    var transport_multiplier = 1.0;
+    if (room.memory[constants.NUM_TRANSPORT] < total_sources * transport_multiplier) {
+        return util.spawn_creep(room, roleTransport, ae);
+    }
+    
+    if (room.memory[constants.NUM_REPAIRER] < 1) {
+        return util.spawn_creep(room, roleRepairer, ae);
+    }
+    
+    if (room.memory[constants.NUM_STATIC_BUILDER] <= room.memory[constants.NUM_STATIC_UPGRADER]) {
+        return util.spawn_creep(room, roleBuilder, ae);
+    } else {
+        return util.spawn_creep(room, roleUpgrader, ae);
+    }
+};
+
+var try_build = function(room) {
+    var spawns = room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_SPAWN}});
+    var first_spawn = spawns[0];
+    // Focus on towers, then extensions, then roads
+    // TODO towers
+    var err_code = util.try_build_extension(room, first_spawn);
+    if(err_code == ERR_RCL_NOT_ENOUGH) {
+        var err_code = util.try_build_road_random(room);
+    }
+};
+
+var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( function(context) {
+    var request = context.request;
+    var cb_fn_id = context.cb_fn_id;
+    var target = Game.getObjectById(request.target);
+    if (target.energy == target.energyCapacity) {
+        target.room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = false;
+        return;
+    }
+    target.room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = true;
+    
+    var new_request = Make_Transport_Request();
+    new_request.source = request.source;
+    new_request.source_type = request.source_type;
+    new_request.target = request.target;
+    new_request.type = request.type;
+    new_request.end_callback = callback_util.register_callback(cb_fn_id, {request:new_request, cb_fn_id:cb_fn_id});
+    
+    var is_source = false;
+    var room = target.room;
+             
+    
+    util.add_to_transport_queue(room, 0, new_request, is_source);
+});
+
+var make_spawn_energy_requests = function(room) {
+    var targets = room.find(FIND_MY_STRUCTURES, {
+                filter: (structure) => {
+                    return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                        structure.energy < structure.energyCapacity && !(room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][structure.id]);
+                }
+        });
+    targets.forEach(function(target){
+        
+        var new_request = Make_Transport_Request();
+        new_request.target = target.id;
+        new_request.type = RESOURCE_ENERGY;
+        new_request.end_callback = callback_util.register_callback(renew_if_not_full_callback_fn_id, {request: new_request, cb_fn_id: renew_if_not_full_callback_fn_id});
+        
+        room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = true;
+        
+        var is_source = false;
+        util.add_to_transport_queue(room, 0, new_request, is_source);
+    });
+}
+ 
+var run_room = function(room) {
+    // var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
+    var err_code = try_spawn(room);
+    if (err_code == OK || Game.time % 20 == 0) {
+        make_spawn_energy_requests(room);
+    }
+    if (Game.time % 5 == 0 && room.memory[constants.NUM_BUILDERS]) {
+        if(room.find(FIND_CONSTRUCTION_SITES).length == 0) {
+            try_build(room);
+        }
+    }
+};
+
+
+module.exports = {
+    run_room: run_room,
+    start_phase: start_phase,
+    end_phase: end_phase
+};
