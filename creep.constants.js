@@ -49,6 +49,7 @@ module.exports = {
     NUM_UPGRADERS: "n_u",
     NUM_BUILDERS: "n_b",
     
+    // Phase 2 room memory
     DROP_MINER_TRACKER: "dm_t",
     TRANSPORT_QUEUE_CONSTANTS: transport_queue_names,
     TRANSPORT_SOURCE_TYPES: transport_souce_types,
@@ -60,6 +61,10 @@ module.exports = {
     NUM_STATIC_UPGRADER: "n_su",
     NUM_TRANSPORT: "n_t",
     NUM_REPAIRER: "n_r",
+    
+    // DROP_MINER
+    DROP_MINER_REQUEST_ENERGY: 100,
+    DROP_MINER_PRIORITY_REQUEST_ENERGY: 250,
     
     // Repairer
     REPAIRER_REPAIR_THRESHOLD: 0.75,

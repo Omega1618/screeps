@@ -15,7 +15,7 @@ var memory_init = function(room, creep_body) {
     
     var num_work = creep_body.filter(function(e) {return e == WORK}).length;
     
-    return {target:source, role: constants.role_enum.DROP_MINER, num_work:num_work, drop_count: 0, pickup_request:null, priority:null};
+    return {target:source, role: constants.role_enum.DROP_MINER, num_work:num_work, harvested: 0, pickup_request:null, priority:null};
 };
 
 var startup_creep = function(creep_memory) {
@@ -33,7 +33,7 @@ var shutdown_creep = function(creep_memory) {
 var miner_reset_drop_count_cb_fn_id = callback_util.register_callback_fn( function(creep_id) {
     var creep = Game.getObjectById(creep_id);
     if (creep !== null) {
-        creep.memory.drop_count = 0;
+        creep.memory.harvested = 0;
         creep.memory.pickup_request = null;
         creep.memory.priority = null;
     }
@@ -43,19 +43,20 @@ var miner_reset_drop_count_cb_fn_id = callback_util.register_callback_fn( functi
 var run = function(creep) {
     // TODO send the request when the energy capacity is almost at max, rather than exactly at max
     
-    if(creep.carry.energy < creep.carryCapacity) {
-        var source = Game.getObjectById(creep.memory.target);
-        if (source === null) {
-            creep.suicide();
-            return;
-        }
-        
-        if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
-            var err_code = creep.moveTo(source);
-        }
-    }  else {
-        creep.drop(RESOURCE_ENERGY);
-        creep.memory.drop_count += 1;
+    var source = Game.getObjectById(creep.memory.target);
+    if (source === null) {
+        creep.suicide();
+        return;
+    }
+    
+    var err_code = creep.harvest(source);
+    if(err_code == ERR_NOT_IN_RANGE) {
+        var err_code = creep.moveTo(source);
+    }
+    if (err_code == OK) {
+        creep.memory.harvested += creep.memory.num_work * 2;
+    }
+    if (creep.memory.harvested > constants.DROP_MINER_REQUEST_ENERGY) {
         
         if (creep.memory.pickup_request === null) {
             var request = Make_Transport_Request();
@@ -69,7 +70,7 @@ var run = function(creep) {
             
             var source = true;
             room_utils.add_to_transport_queue(creep.room, creep.memory.priority, request, source)
-        } else if (creep.memory.drop_count > 2 && creep.memory.priority < constants.DROP_MINIER_HIGH_PRIORITY) {
+        } else if (creep.memory.harvested > constants.DROP_MINER_PRIORITY_REQUEST_ENERGY && creep.memory.priority < constants.DROP_MINIER_HIGH_PRIORITY) {
             creep.memory.priority = constants.DROP_MINIER_HIGH_PRIORITY;
             room_utils.add_to_transport_queue(creep.room, creep.memory.priority, creep.memory.pickup_request, source)
         }
@@ -77,11 +78,11 @@ var run = function(creep) {
 };
 
 var suggested_body = function(energy) {
-    if (energy < 200) {
+    if (energy < 150) {
         return null;
     }
-    var body = [MOVE, CARRY];
-    energy -= 100;
+    var body = [MOVE];
+    energy -= 50;
     
     var num_worker_parts = (energy - (energy % 100)) / 100;
     num_worker_parts = Math.min(num_worker_parts, 5);
@@ -90,9 +91,6 @@ var suggested_body = function(energy) {
     }
     energy -= 100 * num_worker_parts;
     
-    if (energy >= 50) {
-        body.push(CARRY);
-    }
     return body;
 };
 
