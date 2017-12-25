@@ -116,7 +116,7 @@ var get_transport_queue_length = function(room, is_source) {
     
     var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
     var queue = null;
-    if (source) {
+    if (is_source) {
         queue = t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.SOURCE];
     } else {
         queue = t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET];
