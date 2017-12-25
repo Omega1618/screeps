@@ -69,8 +69,10 @@ var suggested_body = function(energy) {
     }
     energy -= 100 * num_worker_parts;
     
-    if (energy >= 50) {
-        body.push(CARRY);
+    for (var i = 0; i < 2; i++) {
+        if (energy >= 50) {
+            body.push(CARRY);
+        }
     }
     return body;
 };

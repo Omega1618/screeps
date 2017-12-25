@@ -171,7 +171,7 @@ var run_room = function(room) {
     if (err_code == OK || Game.time % 20 == 0) {
         make_spawn_energy_requests(room);
     }
-    if (Game.time % 5 == 0 && room.memory[constants.NUM_BUILDERS]) {
+    if (Game.time % 5 == 0 && room.memory[constants.NUM_STATIC_BUILDER]) {
         if(room.find(FIND_CONSTRUCTION_SITES).length == 0) {
             try_build(room);
         }
