@@ -11,6 +11,8 @@ http://creativecommons.org/publicdomain/zero/1.0/legalcode
 
 */
 
+// TODO consider using a k-d tree instead of a Queue so that you can get the nearest request.
+
 /* Creates a new queue. A queue is a first-in-first-out (FIFO) data structure -
  * items are added to the end of the queue and removed from the front.
  */

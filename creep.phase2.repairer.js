@@ -46,8 +46,8 @@ var run = function(creep) {
     }
     
     if (creep.memory.target === null) {
-        // TODO walls
-        // TODO this can be optimized much batter
+        // TODO walls and roads
+        // TODO this can be optimized much better
         creep.memory.target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
                 filter: (structure) => {
                     return structure.hits < structure.hitsMax * constants.REPAIRER_PRIORITY_REPAIR_THRESHOLD;

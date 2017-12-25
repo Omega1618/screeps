@@ -3,7 +3,7 @@ var room_utils = require('room.utilities');
 var callback_util = require('utilities.call_back');
 
 var memory_init = function(room, creep_body) {
-    return {request:null, role: constants.role_enum.TRANSPORT, room_name:room.name};
+    return {request:null, find_source:true, role: constants.role_enum.TRANSPORT, room_name:room.name};
 };
 
 var startup_creep = function(creep_memory) {
@@ -22,13 +22,23 @@ var shutdown_creep = function(creep_memory) {
     }
 };
 
+var update_find_source = function(creep) {
+    if (creep.memory.find_source) {
+        creep.memory.find_source = creep.carry.energy <= creep.carryCapacity * 0.5;
+    } else {
+        creep.memory.find_source = creep.carry.energy <= creep.carryCapacity * 0.25;
+    }    
+}
+
 var check_and_get_request = function(creep) {
     if (creep.memory.request !== null) {
         return;
     }
+    
+    update_find_source(creep);
+    
     var room = creep.room;
-    var is_source = creep.carry.energy <= creep.carryCapacity * 0.5;
-    var request = room_utils.get_from_transport_queue(room, is_source);
+    var request = room_utils.get_from_transport_queue(room, creep.memory.find_source);
     if (request !== undefined) {
         if (room_utils.transport_request_should_ignore(room, request)) {
             callback_util.del(request.start_callback);
@@ -123,12 +133,24 @@ var suggested_body = function(energy) {
         return null;
     }
     var body = [MOVE, CARRY];
-    energy = Math.min(300, energy - 100);
+    energy = Math.min(600, energy) - 100;
     
-    var num_parts = (energy - (energy % 100)) / 100;
+    if (energy >= 50) {
+        body.push(CARRY);
+        energy = Math.max(0, energy - 50);
+    }
+    
+    var num_parts = (energy - (energy % 150)) / 150;
     for(var i = 0; i < num_parts; ++i) {
         body.push(MOVE);
         body.push(CARRY);
+        body.push(CARRY);
+        energy -= 150;
+    }
+    
+    if (energy >= 100) {
+        body.push(MOVE);
+        body.push(CARRY);        
     }
     
     return body;

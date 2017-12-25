@@ -72,7 +72,7 @@ var try_spawn = function(room) {
     var ac = room.energyCapacityAvailable;
     
     if (room.memory[constants.NUM_TRANSPORT] < 1) {
-        return util.spawn_creep(room, roleTransport, 100);
+        return util.spawn_creep(room, roleTransport, Math.min(ae, 150));
     }
     
     if (room.memory[constants.NUM_DROP_MINERS] <  1) {
