@@ -105,7 +105,9 @@ var get_from_transport_queue = function(room, source) {
         queue = t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET];
     }
     var request = MultiQueue.dequeue(queue);
-    delete room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
+    if (request !== undefined) {
+        delete room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
+    }
     return request;
 };
 
