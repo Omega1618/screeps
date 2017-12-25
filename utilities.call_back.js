@@ -55,11 +55,18 @@
      // console.log(cb_id + " to " + (Memory.next_callback_id - 1));
      return Memory.next_callback_id - 1;
  }
+ 
+ var del = function(cb_id) {
+     if (cb_id || cb_id === 0) {
+        delete Memory.callbacks[cb_id];
+     }
+ }
 
 module.exports = {
     register_callback_fn:register_callback_fn,
     get_callback_fn:get_callback_fn,
     register_callback:register_callback,
-    exec:exec
+    exec:exec,
+    del:del
     //copy_callback:copy_callback
 };

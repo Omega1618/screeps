@@ -18,7 +18,6 @@ var shutdown_creep = function(creep_memory) {
     var request = creep_memory.request;
     if (request !== null) {
         callback_util.exec(request.end_callback);
-        room_utils.transport_request_mark_done(Gane.rooms[creep_memory.room_name], request);
         creep_memory.request = null;
     }
 };
@@ -30,10 +29,15 @@ var check_and_get_request = function(creep) {
     var room = creep.room;
     var is_source = creep.carry.energy <= creep.carryCapacity * 0.5;
     var request = room_utils.get_from_transport_queue(room, is_source);
-    if (request !== undefined && !room_utils.transport_request_is_started(room, request)) {
-        room_utils.transport_request_mark_started(room, request);
-        creep.memory.request = request;
-        callback_util.exec(request.start_callback);
+    if (request !== undefined) {
+        if (room_utils.transport_request_should_ignore(room, request)) {
+            callback_util.del(request.start_callback);
+            callback_util.del(request.end_callback);
+        } else {
+            room_utils.transport_request_mark_ignore(room, request);
+            creep.memory.request = request;
+            callback_util.exec(request.start_callback);
+        }
     }
 }
 
@@ -111,7 +115,6 @@ var run = function(creep) {
     if (err_code == OK) {
         // console.log("Completed request");
         callback_util.exec(request.end_callback);
-        room_utils.transport_request_mark_done(creep.room, request);
         creep.memory.request = null;
     }
 };

@@ -39,6 +39,25 @@ var miner_reset_drop_count_cb_fn_id = callback_util.register_callback_fn( functi
     }
 });
 
+var make_pickup_request = function(creep, priority) {
+    var room = creep.room;
+    if (creep.memory.pickup_request !== null) {
+        room_utils.transport_request_mark_ignore(room, creep.memory.pickup_request);
+    }
+    
+    var request = Make_Transport_Request();
+    request.source = creep.pos;
+    request.type = RESOURCE_ENERGY;
+    request.source_type = constants.TRANSPORT_SOURCE_TYPES.POSITION;
+    request.end_callback = callback_util.register_callback(miner_reset_drop_count_cb_fn_id, creep.id);
+    
+    creep.memory.pickup_request = request;
+    creep.memory.priority = priority;
+    
+    var source = true;
+    room_utils.add_to_transport_queue(creep.room, creep.memory.priority, request, source);
+}
+
 /** @param {Creep} creep **/
 var run = function(creep) {    
     var source = Game.getObjectById(creep.memory.target);
@@ -55,30 +74,15 @@ var run = function(creep) {
         creep.memory.harvested += creep.memory.num_work * 2;
     } 
 
-    if (creep.memory.pickup_request === null) {
-        var request = Make_Transport_Request();
-        request.source = creep.pos;
-        request.type = RESOURCE_ENERGY;
-        request.source_type = constants.TRANSPORT_SOURCE_TYPES.POSITION;
-        request.end_callback = callback_util.register_callback(miner_reset_drop_count_cb_fn_id, creep.id);
-        
-        creep.memory.pickup_request = request;
-        creep.memory.priority = constants.TRANSPORT_IDLE_PRIORITY;
-        
-        var source = true;
-        // console.log("Before: " + creep.memory.pickup_request.id); 
-        room_utils.add_to_transport_queue(creep.room, creep.memory.priority, request, source)
-        // console.log("After: " + creep.memory.pickup_request.id); 
-    }  
-    // console.log(creep.memory.pickup_request.id); 
     
+    if (creep.memory.pickup_request === null) {
+        make_pickup_request(creep, constants.TRANSPORT_IDLE_PRIORITY);
+    }
     if (creep.memory.harvested > constants.DROP_MINER_REQUEST_ENERGY && creep.memory.priority < constants.DROP_MINIER_PRIORITY) {
-        creep.memory.priority = constants.DROP_MINIER_PRIORITY;
-        room_utils.add_to_transport_queue(creep.room, creep.memory.priority, creep.memory.pickup_request, source)
+        make_pickup_request(creep, constants.DROP_MINIER_PRIORITY);
     }
     if (creep.memory.harvested > constants.DROP_MINER_PRIORITY_REQUEST_ENERGY && creep.memory.priority < constants.DROP_MINIER_HIGH_PRIORITY) {
-        creep.memory.priority = constants.DROP_MINIER_HIGH_PRIORITY;
-        room_utils.add_to_transport_queue(creep.room, creep.memory.priority, creep.memory.pickup_request, source)
+        make_pickup_request(creep, constants.DROP_MINIER_HIGH_PRIORITY);
     }
 };
 

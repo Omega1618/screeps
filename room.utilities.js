@@ -1,6 +1,7 @@
 var constants = require('creep.constants');
 var base_lib = require("room.base_position");
 var MultiQueue = require('utilities.queue');
+// var callback_util = require('utilities.call_back');
 
 var spawn_creep = function(room, creep_module, energy) {
     var spawners = room.find(FIND_MY_STRUCTURES, {
@@ -67,6 +68,9 @@ var check_and_init_transport_queues = function(room) {
     room.memory[constants.TRANSPORT_REQUEST_TRACKER_NEXT_ID] = 1;
 }
 
+/**
+ * Enqueue each request at most once
+ **/
 var add_to_transport_queue = function(room, priority, request, source) {
     // console.log("Adding request to transport queue");
     // for (var p in request) {
@@ -100,7 +104,9 @@ var get_from_transport_queue = function(room, source) {
     } else {
         queue = t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET];
     }
-    return MultiQueue.dequeue(queue);
+    var request = MultiQueue.dequeue(queue);
+    delete room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
+    return request;
 };
 
 var get_transport_queue_length = function(room, is_source) {
@@ -116,15 +122,11 @@ var get_transport_queue_length = function(room, is_source) {
     return MultiQueue.getLength(queue);
 };
 
-var transport_request_mark_started = function(room, request) {
+var transport_request_mark_ignore = function(room, request) {
     room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id] = true;
 };
 
-var transport_request_mark_done = function(room, request) {
-    delete room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
-};
-
-var transport_request_is_started = function(room, request) {
+var transport_request_should_ignore = function(room, request) {
     if (request.id === null) {
         return false;
     }
@@ -138,7 +140,6 @@ module.exports = {
     add_to_transport_queue: add_to_transport_queue,
     get_from_transport_queue: get_from_transport_queue,
     get_transport_queue_length: get_transport_queue_length,
-    transport_request_mark_started: transport_request_mark_started,
-    transport_request_mark_done: transport_request_mark_done,
-    transport_request_is_started: transport_request_is_started
+    transport_request_mark_ignore: transport_request_mark_ignore,
+    transport_request_should_ignore: transport_request_should_ignore
 };
