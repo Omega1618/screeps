@@ -9,8 +9,7 @@
  
  function Make_Transport_Request() {
      var tr = {
-         finished: false,
-         started: false,
+         id: null,
          source: undefined,
          source_type: undefined,
          target: undefined,

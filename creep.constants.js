@@ -51,8 +51,6 @@ module.exports = {
     
     // Phase 2 room memory
     DROP_MINER_TRACKER: "dm_t",
-    TRANSPORT_QUEUE_CONSTANTS: transport_queue_names,
-    TRANSPORT_SOURCE_TYPES: transport_souce_types,
     TRANSPORT_STRUCTURE_ENERGY_REQUEST: "er",
     
     NUM_DROP_MINERS: "n_dm",
@@ -72,6 +70,12 @@ module.exports = {
     
     // TRANSPORT
     TRANSPORT_IDLE_PRIORITY: -999,
+    
+    // Transport Queues
+    TRANSPORT_QUEUE_CONSTANTS: transport_queue_names,
+    TRANSPORT_SOURCE_TYPES: transport_souce_types,
+    TRANSPORT_REQUEST_TRACKER: 'trt',
+    TRANSPORT_REQUEST_TRACKER_NEXT_ID: 'trt_id',
     
     // Sources
     DROP_MINIER_PRIORITY: 0,

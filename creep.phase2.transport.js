@@ -15,8 +15,11 @@ var shutdown_creep = function(creep_memory) {
     var room = Game.rooms[creep_memory.room_name];
     room.memory[constants.NUM_TRANSPORT] -= 1;
     
+    var request = creep_memory.request;
     if (request !== null) {
-        // TODO
+        callback_util.exec(request.end_callback);
+        room_utils.transport_request_mark_done(Gane.rooms[creep_memory.room_name], request);
+        creep_memory.request = null;
     }
 };
 
