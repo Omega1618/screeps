@@ -123,7 +123,7 @@ var suggested_body = function(energy) {
         return null;
     }
     var body = [MOVE, CARRY];
-    energy = Math.min(200, energy - 100);
+    energy = Math.min(300, energy - 100);
     
     var num_parts = (energy - (energy % 100)) / 100;
     for(var i = 0; i < num_parts; ++i) {
