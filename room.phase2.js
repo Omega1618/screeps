@@ -91,7 +91,7 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleMiner, ae);
     }
     
-    var queue_length = util.get_transport_queue_length(room, true) + util.get_transport_queue_length(room, false);
+    var queue_length = Math.min(util.get_transport_queue_length(room, true), util.get_transport_queue_length(room, false));
     var total_sources = room.memory[constants.NUM_DROP_MINERS] + room.memory[constants.NUM_STATIC_UPGRADER] + room.memory[constants.NUM_STATIC_BUILDER] * 0.75 + queue_length * 0.1;
     var transport_multiplier = 1.0;
     if (room.memory[constants.NUM_TRANSPORT] < total_sources * transport_multiplier) {

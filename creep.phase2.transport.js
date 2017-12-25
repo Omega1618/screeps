@@ -34,7 +34,6 @@ var check_and_get_request = function(creep) {
             callback_util.del(request.start_callback);
             callback_util.del(request.end_callback);
         } else {
-            room_utils.transport_request_mark_ignore(room, request);
             creep.memory.request = request;
             callback_util.exec(request.start_callback);
         }
