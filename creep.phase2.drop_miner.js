@@ -66,8 +66,11 @@ var run = function(creep) {
         creep.memory.priority = constants.TRANSPORT_IDLE_PRIORITY;
         
         var source = true;
+        // console.log("Before: " + creep.memory.pickup_request.id); 
         room_utils.add_to_transport_queue(creep.room, creep.memory.priority, request, source)
-    }   
+        // console.log("After: " + creep.memory.pickup_request.id); 
+    }  
+    // console.log(creep.memory.pickup_request.id); 
     
     if (creep.memory.harvested > constants.DROP_MINER_REQUEST_ENERGY && creep.memory.priority < constants.DROP_MINIER_PRIORITY) {
         creep.memory.priority = constants.DROP_MINIER_PRIORITY;
