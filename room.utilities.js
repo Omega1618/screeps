@@ -52,11 +52,34 @@ var try_build_road_random = function(room) {
     return room.createConstructionSite(pos, STRUCTURE_ROAD);
 };
 
+// TODO room.memory[constants.TRANSPORT_REQUEST_TRACKER_NEXT_ID] may overflow
+var check_and_init_transport_queues = function(room) {
+    
+    if (room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES]) {
+        return;
+    }
+    
+    var t_queues = {};
+    t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.SOURCE] = MultiQueue.make();
+    t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET] = MultiQueue.make();
+    room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES] = t_queues;
+    room.memory[constants.TRANSPORT_REQUEST_TRACKER] = {};
+    room.memory[constants.TRANSPORT_REQUEST_TRACKER_NEXT_ID] = 1;
+}
+
 var add_to_transport_queue = function(room, priority, request, source) {
     // console.log("Adding request to transport queue");
     // for (var p in request) {
     //     console.log(p + ": " + request[p]);
     // }
+    check_and_init_transport_queues(room);
+    
+    if (request.id === null) {
+        request.id = room.memory[constants.TRANSPORT_REQUEST_TRACKER_NEXT_ID];
+        ++room.memory[constants.TRANSPORT_REQUEST_TRACKER_NEXT_ID];
+        room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id] = false;
+    }
+    
     var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
     var queue = null;
     if (source) {
@@ -68,6 +91,8 @@ var add_to_transport_queue = function(room, priority, request, source) {
 };
 
 var get_from_transport_queue = function(room, source) {
+    check_and_init_transport_queues(room);
+    
     var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
     var queue = null;
     if (source) {
@@ -78,10 +103,42 @@ var get_from_transport_queue = function(room, source) {
     return MultiQueue.dequeue(queue);
 };
 
+var get_transport_queue_length = function(room, is_source) {
+    check_and_init_transport_queues(room);
+    
+    var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
+    var queue = null;
+    if (source) {
+        queue = t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.SOURCE];
+    } else {
+        queue = t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET];
+    }
+    return MultiQueue.getLength(queue);
+};
+
+var transport_request_mark_started = function(room, request) {
+    room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id] = true;
+};
+
+var transport_request_mark_done = function(room, request) {
+    delete room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
+};
+
+var transport_request_is_started = function(room, request) {
+    if (request.id === null) {
+        return false;
+    }
+    return room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
+};
+
 module.exports = {
     spawn_creep: spawn_creep,
     try_build_extension: try_build_extension,
     try_build_road_random: try_build_road_random,
     add_to_transport_queue: add_to_transport_queue,
-    get_from_transport_queue: get_from_transport_queue
+    get_from_transport_queue: get_from_transport_queue,
+    get_transport_queue_length: get_transport_queue_length,
+    transport_request_mark_started: transport_request_mark_started,
+    transport_request_mark_done: transport_request_mark_done,
+    transport_request_is_started: transport_request_is_started
 };

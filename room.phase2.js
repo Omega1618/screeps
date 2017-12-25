@@ -1,5 +1,3 @@
-// TODO this code is totally not done.
-
 /**
  * 
  * Maintain a low priority queue for transports and a high priority queue for transports to gather from
@@ -25,35 +23,6 @@ var constants = require('creep.constants');
 var util = require("room.utilities");
 var base_lib = require("room.base_position");
 
-
-/**
-var renew_request_callback_fn_id = callback_util.register_callback_fn( function(request) {
-    var new_request = Make_Transport_Request();
-    new_request.source = request.source;
-    new_request.source_type = request.source_type;
-    new_request.target = request.target;
-    new_request.type = request.type;
-    // TODO need to renew callback
-    new_request.start_callback = request.start_callback;
-    new_request.end_callback = request.end_callback;
-    
-    var is_source = request.target === undefined;
-    var room = null;
-    if (is_source) {
-        if(constants.TRANSPORT_SOURCE_TYPES.POSITION == request.source_type) {
-            room = Game.rooms[request.source.roomName];
-        } else {
-            room = request.source.room;
-        }
-    } else {
-        room = request.target.room;
-    }
-             
-    
-    util.add_to_transport_queue(room, 0, new_request, is_source);
-});
-**/
-
 var start_phase = function(room) {
     // data structure to keep track of miners at each source.
     var has_drop_miner = {};
@@ -73,10 +42,6 @@ var start_phase = function(room) {
     room.memory[constants.DROP_MINER_TRACKER] = has_drop_miner;
     room.memory[constants.SAFE_SOURCES] = sources.map(function(s){return s.id;});
     
-    var t_queues = {};
-    t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.SOURCE] = MultiQueue.make();
-    t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET] = MultiQueue.make();
-    room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES] = t_queues;
     room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST] = {};
     
     room.memory[constants.NUM_DROP_MINERS] = 0;
@@ -91,7 +56,6 @@ var end_phase = function(room) {
     delete room.memory[constants.DROP_MINER_TRACKER];
     delete room.memory[constants.SAFE_SOURCES];
     
-    delete room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
     delete room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST];
     
     delete room.memory[constants.NUM_DROP_MINERS];
@@ -127,8 +91,7 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleMiner, ae);
     }
     
-    var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
-    var queue_length = MultiQueue.getLength(t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.SOURCE]) + MultiQueue.getLength(t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET]);
+    var queue_length = util.get_transport_queue_length(room, true) + util.get_transport_queue_length(room, false);
     var total_sources = room.memory[constants.NUM_DROP_MINERS] + room.memory[constants.NUM_STATIC_UPGRADER] + room.memory[constants.NUM_STATIC_BUILDER] * 0.75 + queue_length * 0.1;
     var transport_multiplier = 1.0;
     if (room.memory[constants.NUM_TRANSPORT] < total_sources * transport_multiplier) {

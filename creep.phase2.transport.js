@@ -24,10 +24,11 @@ var check_and_get_request = function(creep) {
     if (creep.memory.request !== null) {
         return;
     }
+    var room = creep.room;
     var is_source = creep.carry.energy <= creep.carryCapacity * 0.5;
-    var request = room_utils.get_from_transport_queue(creep.room, is_source);
-    if (request !== undefined && !request.started) {
-        request.started = true;
+    var request = room_utils.get_from_transport_queue(room, is_source);
+    if (request !== undefined && !room_utils.transport_request_is_started(room, request)) {
+        room_utils.transport_request_mark_started(room, request);
         creep.memory.request = request;
         callback_util.exec(request.start_callback);
     }
@@ -84,11 +85,6 @@ var run = function(creep) {
         // console.log("Was null");
         return;
     }
-    if (request.finished) {
-        // console.log("Was finished");
-        creep.memory.request = null;
-        return;
-    }
     
     var err_code = ERR_NOT_IN_RANGE;
     var target = request.target;
@@ -112,7 +108,7 @@ var run = function(creep) {
     if (err_code == OK) {
         // console.log("Completed request");
         callback_util.exec(request.end_callback);
-        request.finished = true;
+        room_utils.transport_request_mark_done(creep.room, request);
         creep.memory.request = null;
     }
 };

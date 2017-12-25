@@ -40,9 +40,7 @@ var miner_reset_drop_count_cb_fn_id = callback_util.register_callback_fn( functi
 });
 
 /** @param {Creep} creep **/
-var run = function(creep) {
-    // TODO send the request when the energy capacity is almost at max, rather than exactly at max
-    
+var run = function(creep) {    
     var source = Game.getObjectById(creep.memory.target);
     if (source === null) {
         creep.suicide();
