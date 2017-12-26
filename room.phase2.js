@@ -112,7 +112,7 @@ var try_spawn = function(room) {
 var try_build = function(room) {
     var spawns = room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_SPAWN}});
     var first_spawn = spawns[0];
-    // Focus on towers, then extensions, then roads
+    // Focus on towers, then extensions, then roads, then containers (assuming transport is more of an issue then decay)
     // TODO towers
     var err_code = util.try_build_extension(room, first_spawn);
     if(err_code == ERR_RCL_NOT_ENOUGH) {
