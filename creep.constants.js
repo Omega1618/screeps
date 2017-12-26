@@ -55,8 +55,8 @@ module.exports = {
     // Phase 2 room memory
     DROP_MINER_TRACKER: "dm_t",
     TRANSPORT_STRUCTURE_ENERGY_REQUEST: "er",
-    BUILDER_WORKER_PARTS: "er",
-    UPGRADER_WORKER_PARTS: "er",
+    STATIC_BUILDER_WORKER_PARTS: "n_sbwp",
+    STATIC_UPGRADER_WORKER_PARTS: "n_suwp",
     
     NUM_DROP_MINERS: "n_dm",
     NUM_STATIC_BUILDER: "n_sb",

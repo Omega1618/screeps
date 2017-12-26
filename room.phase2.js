@@ -50,8 +50,8 @@ var start_phase = function(room) {
     room.memory[constants.NUM_TRANSPORT] = 0;
     room.memory[constants.NUM_REPAIRER] = 0;
     
-    room.memory[constants.BUILDER_WORKER_PARTS] = 0;
-    room.memory[constants.UPGRADER_WORKER_PARTS] = 0;
+    room.memory[constants.STATIC_BUILDER_WORKER_PARTS] = 0;
+    room.memory[constants.STATIC_UPGRADER_WORKER_PARTS] = 0;
 };
 
 var end_phase = function(room) {
@@ -66,8 +66,8 @@ var end_phase = function(room) {
     delete room.memory[constants.NUM_TRANSPORT];
     delete room.memory[constants.NUM_REPAIRER];
     
-    delete room.memory[constants.BUILDER_WORKER_PARTS];
-    delete room.memory[constants.UPGRADER_WORKER_PARTS];
+    delete room.memory[constants.STATIC_BUILDER_WORKER_PARTS];
+    delete room.memory[constants.STATIC_UPGRADER_WORKER_PARTS];
 };
 
 var try_party = function (room) {
@@ -110,8 +110,8 @@ var try_spawn = function(room) {
     }
     
     var incoming_energy = room.memory[constants.NUM_SAFE_SOURCES] * 10; // TODO update this with source keeper sources and long distance mining.
-    var builder_outgoing_energy = room.memory[constants.BUILDER_WORKER_PARTS] * BUILD_POWER;
-    var upgrader_outgoing_energy = room.memory[constants.UPGRADER_WORKER_PARTS] * UPGRADE_CONTROLLER_POWER;
+    var builder_outgoing_energy = room.memory[constants.STATIC_BUILDER_WORKER_PARTS] * BUILD_POWER;
+    var upgrader_outgoing_energy = room.memory[constants.STATIC_UPGRADER_WORKER_PARTS] * UPGRADE_CONTROLLER_POWER;
     
     if (builder_outgoing_energy < incoming_energy / 2.0) {
         return util.spawn_creep(room, roleBuilder, ae);
