@@ -78,6 +78,7 @@ var run = function(creep) {
     if (creep.memory.pickup_request === null) {
         make_pickup_request(creep, constants.TRANSPORT_IDLE_PRIORITY);
     }
+    // TODO need to check if a transport creep has already started on the order before increasing priority.
     if (creep.memory.harvested > constants.DROP_MINER_REQUEST_ENERGY && creep.memory.priority < constants.DROP_MINIER_PRIORITY) {
         make_pickup_request(creep, constants.DROP_MINIER_PRIORITY);
     }
