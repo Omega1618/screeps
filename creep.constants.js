@@ -45,6 +45,7 @@ module.exports = {
     
     WORK_SOURCE_COUNTER_NAME: "w_sc",
     SAFE_SOURCES: "ss",
+    NUM_SAFE_SOURCES: "n_ss",
     SOURCE_DELAY: "sd",
     
     NUM_HARVESTERS: "n_h",
@@ -54,6 +55,8 @@ module.exports = {
     // Phase 2 room memory
     DROP_MINER_TRACKER: "dm_t",
     TRANSPORT_STRUCTURE_ENERGY_REQUEST: "er",
+    BUILDER_WORKER_PARTS: "er",
+    UPGRADER_WORKER_PARTS: "er",
     
     NUM_DROP_MINERS: "n_dm",
     NUM_STATIC_BUILDER: "n_sb",
@@ -83,12 +86,13 @@ module.exports = {
     DROP_MINIER_HIGH_PRIORITY: 1,
     
     // Sinks
+    SPAWNER_REQUEST_PRIORITY: 0,
     STATIC_UPGRADER_PRIORITY: 0,
-    STATIC_UPGRADER_REQUEST_ENERGY: 10,
+    STATIC_UPGRADER_REQUEST_ENERGY: 20,
     STATIC_BUILDER_PRIORITY: 0,
-    STATIC_BUILDER_REQUEST_ENERGY: 10,
+    STATIC_BUILDER_REQUEST_ENERGY: 20,
     REPAIRER_PRIORITY: 0,
-    REPAIRER_REQUEST_ENERGY: 5,
+    REPAIRER_REQUEST_ENERGY: 10,
     
     // Parties
     party_enum: party_enum,

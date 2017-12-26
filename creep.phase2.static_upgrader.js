@@ -11,11 +11,13 @@ var memory_init = function(room, creep_body) {
 var startup_creep = function(creep_memory) {
     var room = Game.rooms[creep_memory.room_name];
     room.memory[constants.NUM_STATIC_UPGRADER] += 1;
+    room.memory[constants.UPGRADER_WORKER_PARTS] += creep_memory.num_work;
 };
 
 var shutdown_creep = function(creep_memory) {
     var room = Game.rooms[creep_memory.room_name];
     room.memory[constants.NUM_STATIC_UPGRADER] -= 1;
+    room.memory[constants.UPGRADER_WORKER_PARTS] += creep_memory.num_work;
 };
 
 var static_upgrader_reset_cb_fn_id = callback_util.register_callback_fn( function(creep_id) {

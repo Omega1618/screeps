@@ -40,6 +40,7 @@ var start_phase = function(room) {
     });
     room.memory[constants.DROP_MINER_TRACKER] = has_drop_miner;
     room.memory[constants.SAFE_SOURCES] = sources.map(function(s){return s.id;});
+    room.memory[constants.NUM_SAFE_SOURCES] = Object.keys(room.memory[constants.SAFE_SOURCES]).length;
     
     room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST] = {};
     
@@ -48,6 +49,9 @@ var start_phase = function(room) {
     room.memory[constants.NUM_STATIC_UPGRADER] = 0;
     room.memory[constants.NUM_TRANSPORT] = 0;
     room.memory[constants.NUM_REPAIRER] = 0;
+    
+    room.memory[constants.BUILDER_WORKER_PARTS] = 0;
+    room.memory[constants.UPGRADER_WORKER_PARTS] = 0;
 };
 
 var end_phase = function(room) {
@@ -61,7 +65,14 @@ var end_phase = function(room) {
     delete room.memory[constants.NUM_STATIC_UPGRADER];
     delete room.memory[constants.NUM_TRANSPORT];
     delete room.memory[constants.NUM_REPAIRER];
+    
+    delete room.memory[constants.BUILDER_WORKER_PARTS];
+    delete room.memory[constants.UPGRADER_WORKER_PARTS];
 };
+
+var try_party = function (room) {
+    // TODO
+}
 
 var try_spawn = function(room) {
     var ae = room.energyAvailable;
@@ -98,11 +109,20 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleRepairer, ae);
     }
     
-    if (room.memory[constants.NUM_STATIC_BUILDER] <= room.memory[constants.NUM_STATIC_UPGRADER]) {
+    var incoming_energy = room.memory[constants.NUM_SAFE_SOURCES] * 10; // TODO update this with source keeper sources and long distance mining.
+    var builder_outgoing_energy = room.memory[constants.BUILDER_WORKER_PARTS] * BUILD_POWER;
+    var upgrader_outgoing_energy = room.memory[constants.UPGRADER_WORKER_PARTS] * UPGRADE_CONTROLLER_POWER;
+    
+    if (builder_outgoing_energy < incoming_energy / 2.0) {
         return util.spawn_creep(room, roleBuilder, ae);
-    } else {
+    }
+    
+    if (upgrader_outgoing_energy < incoming_energy / 2.0) {
         return util.spawn_creep(room, roleUpgrader, ae);
     }
+    
+    try_party(room);
+    return ERR_FULL;
 };
 
 var try_build = function(room) {
@@ -137,7 +157,7 @@ var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( funct
     var room = target.room;
              
     
-    util.add_to_transport_queue(room, 0, new_request, is_source);
+    util.add_to_transport_queue(room, constants.SPAWNER_REQUEST_PRIORITY, new_request, is_source);
 });
 
 var make_spawn_energy_requests = function(room) {
@@ -157,7 +177,7 @@ var make_spawn_energy_requests = function(room) {
         room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = true;
         
         var is_source = false;
-        util.add_to_transport_queue(room, 0, new_request, is_source);
+        util.add_to_transport_queue(room, constants.SPAWNER_REQUEST_PRIORITY, new_request, is_source);
     });
 }
  
