@@ -8,7 +8,9 @@
  */
  
  
-var role_enum =  {HARVESTER:0, BUILDER:1, UPGRADER:2, DROP_MINER:3, STATIC_BUILDER: 4, PHASE2_MELEE_DEFENDER: 5, TRANSPORT: 6, STATIC_UPGRADER: 7, REPAIRER: 8, RECYCLER: 9};
+var role_enum =  {HARVESTER:0, BUILDER:1, UPGRADER:2, DROP_MINER:3, STATIC_BUILDER: 4, PARTY_DEFEND_MELEE_DEFENDER: 5, TRANSPORT: 6, STATIC_UPGRADER: 7, REPAIRER: 8, RECYCLER: 9};
+
+var party_enum = {DEFEND: 0, ATTACK: 1, CLAIM: 2, LONG_DISTANCE_MINE: 3, TRANSPORT: 4, MINE_POWER: 5};
 
 var basic_body = function(energy) {
     if (energy < 200) {
@@ -55,7 +57,6 @@ module.exports = {
     
     NUM_DROP_MINERS: "n_dm",
     NUM_STATIC_BUILDER: "n_sb",
-    NUM_MELEE_DEFENDER: "n_md",
     NUM_STATIC_UPGRADER: "n_su",
     NUM_TRANSPORT: "n_t",
     NUM_REPAIRER: "n_r",
@@ -88,6 +89,9 @@ module.exports = {
     STATIC_BUILDER_REQUEST_ENERGY: 10,
     REPAIRER_PRIORITY: 0,
     REPAIRER_REQUEST_ENERGY: 5,
+    
+    // Parties
+    party_enum: party_enum,
     
     basic_body: basic_body
 };

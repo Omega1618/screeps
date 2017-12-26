@@ -30,6 +30,10 @@ var recycle_callback_callback_fn_id = callback_util.register_callback_fn( functi
 });
 
 var shutdown_creep = function(creep_memory) {
+    if (!creep_memory.spawner) {
+        return;
+    }
+    
     var request = Make_Transport_Request();
     request.source = new RoomPosition(creep_memory.x, creep_memory.y, creep_memory.room_name);
     request.type = RESOURCE_ENERGY;
@@ -45,6 +49,11 @@ var run = function(creep) {
         var spawners = creep.room.find(FIND_MY_STRUCTURES, {
                 filter: { structureType: STRUCTURE_SPAWN }
         });
+        // TODO check if the room has a transport queue, and if it does not then suicide
+        if (spawners.length == 0) {
+            creep.suicide();
+            return;
+        }
         creep.memory.spawner = spawners[0].id;
     }
     

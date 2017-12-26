@@ -2,16 +2,18 @@ var constants = require('creep.constants');
 
 var re = constants.role_enum;
 var role_id_to_module = {};
+// room creeps
 role_id_to_module[re.HARVESTER] = require('creep.harvester');
 role_id_to_module[re.BUILDER] =  require('creep.builder');
 role_id_to_module[re.UPGRADER] = require('creep.upgrader');
 role_id_to_module[re.RECYCLER] = require('creep.recycler');
 role_id_to_module[re.DROP_MINER] = require('creep.phase2.drop_miner');
 role_id_to_module[re.STATIC_BUILDER] = require('creep.phase2.static_builder');
-role_id_to_module[re.PHASE2_MELEE_DEFENDER] = require('creep.phase2.melee_defender');
 role_id_to_module[re.TRANSPORT] = require('creep.phase2.transport');
 role_id_to_module[re.STATIC_UPGRADER] = require('creep.phase2.static_upgrader');
 role_id_to_module[re.REPAIRER] = require('creep.phase2.repairer');
+// party defend creeps
+role_id_to_module[re.PARTY_DEFEND_MELEE_DEFENDER] = require('party.defend.creep.melee_defender');
 
 
 var run_creep = function(creep) {

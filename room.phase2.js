@@ -9,7 +9,6 @@
 
 var roleBuilder = require('creep.phase2.static_builder');
 var roleMiner = require('creep.phase2.drop_miner');
-var roleDefender = require('creep.phase2.melee_defender');
 var roleTransport = require('creep.phase2.transport');
 var roleUpgrader = require('creep.phase2.static_upgrader');
 var roleRepairer = require('creep.phase2.repairer');
@@ -46,7 +45,6 @@ var start_phase = function(room) {
     
     room.memory[constants.NUM_DROP_MINERS] = 0;
     room.memory[constants.NUM_STATIC_BUILDER] = 0;
-    room.memory[constants.NUM_MELEE_DEFENDER] = 0;
     room.memory[constants.NUM_STATIC_UPGRADER] = 0;
     room.memory[constants.NUM_TRANSPORT] = 0;
     room.memory[constants.NUM_REPAIRER] = 0;
@@ -60,14 +58,12 @@ var end_phase = function(room) {
     
     delete room.memory[constants.NUM_DROP_MINERS];
     delete room.memory[constants.NUM_STATIC_BUILDER];
-    delete room.memory[constants.NUM_MELEE_DEFENDER];
     delete room.memory[constants.NUM_STATIC_UPGRADER];
     delete room.memory[constants.NUM_TRANSPORT];
     delete room.memory[constants.NUM_REPAIRER];
 };
 
 var try_spawn = function(room) {
-    // TODO when to spawn melee defenders
     var ae = room.energyAvailable;
     var ac = room.energyCapacityAvailable;
     

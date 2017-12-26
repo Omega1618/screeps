@@ -39,6 +39,7 @@ var start_phase = function(room) {
 };
 
 var end_phase = function(room) {
+    // TODO this code is actually bad, you shouldn't recycle creeps that are in parties that are in the room.
     creep_util.all_creeps_to_recyclers(room.find(FIND_MY_CREEPS));
     
     delete room.memory[constants.WORK_SOURCE_COUNTER_NAME];
