@@ -35,6 +35,16 @@ var startup =  function (party_memory) {
    //TODO
 };
 
+var get_creep = function(creep_id) {
+    if (creep_id) {
+        var creep = Game.getObjectById(creep_id);
+        if (creep) {
+            return creep;
+        }
+    }
+    return null;
+}
+
 var run =  function (party_memory) {
    // TODO
    // disband when drop miner dies
@@ -63,8 +73,4 @@ module.exports = {
   should_disband: should_disband,
   force_disband: force_disband,
   shutdown: shutdown 
-};
-
-module.exports = {
-
 };

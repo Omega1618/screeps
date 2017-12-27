@@ -164,5 +164,5 @@ var suggested_body = function(energy) {
 };
 
 module.exports = {memory_init:memory_init, run:run, startup_creep:startup_creep, shutdown_creep:shutdown_creep,
-                  suggested_body: suggested_body
+                  suggested_body: suggested_body, parse_source:parse_source
 };
