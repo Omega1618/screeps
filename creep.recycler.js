@@ -80,8 +80,17 @@ var become_recycler = function(creep, shutdown_fn) {
     shutdown_fn(Memory.creeps[creep_name]);
     Memory.creeps[creep_name] = roleRecycler.memory_init(creep.room, creep_body);
     roleRecycler.startup_creep(Memory.creeps[creep_name]);
-}
+};
+
+var id_to_recycler = function(id, shutdown_fn) {
+    if (id) {
+        var creep = Game.getObjectById(id);
+        if (creep) {
+            become_recycler(creep, shutdown_fn);
+        }
+    }
+};
 
 module.exports = {memory_init:memory_init, run:run, startup_creep:startup_creep, shutdown_creep:shutdown_creep,
-                  suggested_body: suggested_body, become_recycler:become_recycler
+                  suggested_body: suggested_body, become_recycler:become_recycler, id_to_recycler: id_to_recycler
 };

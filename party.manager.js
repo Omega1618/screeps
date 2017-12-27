@@ -40,6 +40,11 @@ var cleanup_party = function(party_id) {
 	delete Memory.parties[party_id];
 };
 
+var disband_party = function(party_id) {
+    var party_memory = Memory.parties[party_id];
+    get_module_from_id(party_id).force_disband(party_memory);
+};
+
 var run_parties = function() {
     if (!_.has(Memory, 'parties')) {
         Memory.parties = {};
@@ -58,7 +63,7 @@ var run_parties = function() {
 };
 
 var create_party = fucntion(room, party_module_id) {
-    var module = get_module_from_id(party_module_id);
+    var module = party_module_id_to_module[party_module_id];
     if (module === null) {
         return null;
     }
@@ -78,6 +83,7 @@ var create_party = fucntion(room, party_module_id) {
 module.exports = {
     run_parties: run_parties,
     create_party: create_party,
+    disband_party: disband_party,
     
     run_party: run_party,
     cleanup_party: cleanup_party
