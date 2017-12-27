@@ -40,7 +40,12 @@ var harvest_source = function(creep) {
         var err_code = creep.moveTo(source);
         if(err_code == ERR_NO_PATH) {
             creep.memory.no_path_counter += 1;
-            creep.room.memory[constants.SOURCE_DELAY][creep.memory.source_id] += 1;
+            var source_delay = creep.room.memory[constants.SOURCE_DELAY];
+            if (source_delay) {
+                source_delay[creep.memory.source_id] += 1;
+            } else {
+                return; // Stupid error can occur where the creep accidentally leaves the room -- this is the only necessary handling.
+            }
             if(creep.memory.no_path_counter >= 7) {
                 var new_source_id = _.sample(creep.room.memory[constants.SAFE_SOURCES]);
                 creep.room.memory[constants.WORK_SOURCE_COUNTER_NAME][creep.memory.source_id] -= creep.memory.num_work;

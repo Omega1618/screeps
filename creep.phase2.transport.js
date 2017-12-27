@@ -1,6 +1,7 @@
 var constants = require('creep.constants');
 var room_utils = require('room.utilities'); 
 var callback_util = require('utilities.call_back');
+var recyclerRole = require('creep.recycler');
 
 var memory_init = function(room, creep_body) {
     return {request:null, find_source:true, role: constants.role_enum.TRANSPORT, room_name:room.name};
@@ -76,6 +77,9 @@ var parse_source = function(creep, request) {
          case constants.TRANSPORT_SOURCE_TYPES.CREEP:
              source = Game.getObjectById(source);
              err_code = source.transfer(creep, request.type);
+             if (err_code != ERR_BUSY && err_code != ERR_NOT_IN_RANGE) {
+                 err_code = OK;
+             }
              break;
          case constants.TRANSPORT_SOURCE_TYPES.STRUCTURE:
              source = Game.getObjectById(source);
@@ -120,11 +124,14 @@ var run = function(creep) {
     // console.log("Error code: " + err_code);
     if(err_code == ERR_NOT_IN_RANGE) {
         creep.moveTo(target);
-    }
-    if (err_code == OK) {
+    } else if (err_code == OK || err_code == ERR_INVALID_TARGET || err_code == ERR_NOT_OWNER || err_code == ERR_NO_BODYPART
+                || err_code == ERR_NOT_ENOUGH_ENERGY || err_code == ERR_NOT_ENOUGH_RESOURCES) {
         // console.log("Completed request");
         callback_util.exec(request.end_callback);
         creep.memory.request = null;
+        if (err_code == ERR_NO_BODYPART) {
+            recyclerRole.become_recycler(creep, shutdown_creep);
+        }
     }
 };
 

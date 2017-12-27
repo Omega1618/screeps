@@ -21,8 +21,11 @@ var shutdown_creep = function(creep_memory) {
 };
 
 var static_upgrader_reset_cb_fn_id = callback_util.register_callback_fn( function(creep_id) {
-    Game.getObjectById(creep_id).memory.energy_request = null;
-    Game.getObjectById(creep_id).memory.priority = null;
+    var creep = Game.getObjectById(creep_id);
+    if (creep) {
+        creep.memory.energy_request = null;
+        creep.memory.priority = null;
+    }
 });
 
 /** @param {Creep} creep **/

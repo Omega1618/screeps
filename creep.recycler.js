@@ -50,6 +50,7 @@ var run = function(creep) {
                 filter: { structureType: STRUCTURE_SPAWN }
         });
         // TODO check if the room has a transport queue, and if it does not then suicide
+        // TODO also suicide if no move parts that work
         if (spawners.length == 0) {
             creep.suicide();
             return;
@@ -71,6 +72,16 @@ var suggested_body = function(energy) {
     return [MOVE];
 };
 
+var become_recycler = function(creep, shutdown_fn) {
+    var creep_name = creep.name;
+    var creep_body = creep.body.forEach(function(bpart) {
+        return bpart.type;
+    });
+    shutdown_fn(Memory.creeps[creep_name]);
+    Memory.creeps[creep_name] = roleRecycler.memory_init(creep.room, creep_body);
+    roleRecycler.startup_creep(Memory.creeps[creep_name]);
+}
+
 module.exports = {memory_init:memory_init, run:run, startup_creep:startup_creep, shutdown_creep:shutdown_creep,
-                  suggested_body: suggested_body
+                  suggested_body: suggested_body, become_recycler:become_recycler
 };
