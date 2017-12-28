@@ -20,7 +20,7 @@ var callback_util = require('utilities.call_back');
 
 var constants = require('creep.constants');
 var util = require("room.utilities");
-var base_lib = require("room.base_position");
+var room_layout = require('room.layout');
 
 var start_phase = function(room) {
     // data structure to keep track of miners at each source.
@@ -126,14 +126,7 @@ var try_spawn = function(room) {
 };
 
 var try_build = function(room) {
-    var spawns = room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_SPAWN}});
-    var first_spawn = spawns[0];
-    // Focus on towers, then extensions, then roads, then containers (assuming transport is more of an issue then decay)
-    // TODO towers
-    var err_code = util.try_build_extension(room, first_spawn);
-    if(err_code == ERR_RCL_NOT_ENOUGH) {
-        var err_code = util.try_build_road_random(room);
-    }
+    return room_layout.create_next_construction_site(room.name);
 };
 
 var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( function(context) {
