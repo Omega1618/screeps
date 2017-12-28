@@ -65,7 +65,13 @@ var suggested_body = function(energy) {
     for (var i = 0; i < 2; i++) {
         if (energy >= 50) {
             body.push(CARRY);
+            energy -= 50;
         }
+    }
+    
+    if (energy >= 100) {
+        body.push(WORK);
+        energy -= 100;
     }
     return body;
 };

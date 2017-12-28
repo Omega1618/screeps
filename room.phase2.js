@@ -113,6 +113,13 @@ var try_spawn = function(room) {
     var builder_outgoing_energy = room.memory[constants.STATIC_BUILDER_WORKER_PARTS] * BUILD_POWER;
     var upgrader_outgoing_energy = room.memory[constants.STATIC_UPGRADER_WORKER_PARTS] * UPGRADE_CONTROLLER_POWER;
     
+    var builder_output_percentage = 0.5;
+    var upgrader_output_percentage = 0.5;
+    if (room.controller.level < 3) {
+        builder_output_percentage = 0.0;
+        upgrader_output_percentage = 1.0;
+    }
+    
     if (builder_outgoing_energy < incoming_energy / 2.0) {
         return util.spawn_creep(room, roleBuilder, ae);
     }

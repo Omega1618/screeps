@@ -104,6 +104,7 @@ var suggested_body = function(energy) {
     
     // if (energy >= 50) {
     //     body.push(CARRY);
+    //     energy -= 50;
     // }
     return body;
 };

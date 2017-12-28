@@ -2,6 +2,7 @@
 
 // Adapted from https://github.com/ScreepsQuorum/screeps-quorum/
 // Note the order is important
+var _____ = require('roomvisual.prototype')
 var _____ = require('roomposition.prototype')
 var _____ = require("room.layout_prototype")
 var _____ = require('room.layout.roomsetting')

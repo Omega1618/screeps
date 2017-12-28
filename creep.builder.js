@@ -17,8 +17,10 @@ var startup_creep = function(creep_memory) {
 
 var shutdown_creep = function(creep_memory) {
     var source = Game.getObjectById(creep_memory.source_id);
-    source.room.memory[constants.WORK_SOURCE_COUNTER_NAME][creep_memory.source_id] -= creep_memory.num_work;
-    source.room.memory[constants.NUM_BUILDERS] -= 1;
+    if (source.room.memory[constants.WORK_SOURCE_COUNTER_NAME]) {
+        source.room.memory[constants.WORK_SOURCE_COUNTER_NAME][creep_memory.source_id] -= creep_memory.num_work;
+        source.room.memory[constants.NUM_BUILDERS] -= 1;
+    }
 };
 
 /** @param {Creep} creep **/

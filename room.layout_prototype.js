@@ -177,7 +177,7 @@ Room.prototype.getNextMissingStructureType = function () {
       }
     }
   }
-  console.log("No structure needs to be built")
+  console.log("No structure needs to be built. Practical level: " + (nextLevel - 1))
   return false
 }
 

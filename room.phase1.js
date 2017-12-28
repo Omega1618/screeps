@@ -12,6 +12,7 @@ var util = require("room.utilities");
 var creep_util = require('creep.utilities');
 var callback_util = require('utilities.call_back');
 var Make_Transport_Request = require("utilities.transport_request");
+var room_layout = require('room.layout');
 
 var start_phase = function(room) {
     // data structure to keep track of worker parts at each source.
@@ -71,13 +72,8 @@ var try_spawn = function(room, ae) {
 };
 
 var try_build = function(room) {
-    var spawns = room.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_SPAWN}});
-    var first_spawn = spawns[0];
-    // Focus on extensions, then roads
-    var err_code = util.try_build_extension(room, first_spawn);
-    if(err_code == ERR_RCL_NOT_ENOUGH) {
-        var err_code = util.try_build_road_random(room);
-    }
+    var success = room_layout.create_next_construction_site(room.name);
+    console.log("Was able to build: " + success);
 };
  
 var run_room = function(room) {
