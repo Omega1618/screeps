@@ -659,18 +659,61 @@ var save_layout_to_memory = function (room_name) {
 }
 
 // Returns true if successful, returns false otherwise 
-var create_next_construction_site = function (room_name) {
+var plan_layout = function (room_name) {
     var room = Game.rooms[room_name]
-    if(!room.memory.construction_planned_flag) {
-        if (!save_layout_to_memory(room_name)) {
-            return false
-        } else {
-            room.memory.construction_planned_flag = true
-        }
+    if(room.memory.construction_planned_flag) {
+        return true
     }
+    if (save_layout_to_memory(room_name)) {
+        room.memory.construction_planned_flag = true
+        return true
+    } else {
+        return false
+    }
+}
+
+// Returns true if successful, returns false otherwise 
+var create_next_construction_site = function (room_name) {
+    if (!plan_layout(room_name)) {
+        return false
+    }
+    var room = Game.rooms[room_name]
     return room.constructNextMissingStructure()
 }
 
+var save_wall_layout_to_memory = function (room) { 
+    var def_map = room.getDefenseMap()
+    def_map.generate()
+    def_map.save()
+}
+
+// Returns true if successful, returns false otherwise 
+var plan_defense_layout = function (room_name) {
+    var room = Game.rooms[room_name]
+    if(room.memory.walls_planned_flag) {
+        return true
+    }
+    if (save_wall_layout_to_memory(room)) {
+        room.memory.walls_planned_flag = true
+        return true
+    } else {
+        return false
+    }
+}
+
+// Returns true if successful, returns false otherwise
+// May create Wall or Rampart construction sites and then return their ID
+var get_next_defense_target = function(room_name) {
+    return false // delete after method is finished
+    if (!plan_defense_layout(room_name)) {
+        return false
+    }
+    // TODO
+}
+
 module.exports = {
-    create_next_construction_site: create_next_construction_site
+    create_next_construction_site: create_next_construction_site,
+    get_next_defense_target: get_next_defense_target,
+    plan_layout: plan_layout,
+    plan_defense_layout: plan_defense_layout
 }
