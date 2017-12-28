@@ -55,11 +55,11 @@ var try_spawn = function(room, ae) {
     if (room.memory[constants.NUM_HARVESTERS] < 2) {
         return util.spawn_creep(room, roleHarvester, ae);
     }
-    var builder_factor = 0.5;
+    var builder_factor = 0.0;
     var upgrader_factor = 1;
     if (room.controller.level >= 2) {
-        builder_factor = 1.5;
-        upgrader_factor = 0.75;
+        builder_factor = 2.0;
+        upgrader_factor = 0.5;
     }
     if (room.memory[constants.NUM_BUILDERS] < room.memory[constants.NUM_HARVESTERS] * builder_factor) {
         return util.spawn_creep(room, roleBuilder, ae);
