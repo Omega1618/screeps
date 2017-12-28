@@ -1,18 +1,16 @@
 'use strict'
 
 // Adapted from https://github.com/ScreepsQuorum/screeps-quorum/
+// Note the order is important
+var _____ = require('roomposition.prototype')
+var _____ = require("room.layout_prototype")
+var _____ = require('room.layout.roomsetting')
 
 const distanceTransform = require('room.layout.distancetransform')
 
 /**
  * Plan room structures
  */
- 
-global.SEGMENT_CONSTRUCTION = 'construction'
-global.SEGMENT_RAMPARTS = 'ramparts'
-
-global.STRUCTURE_LOADER = 'loader'
-global.STRUCTURE_CRANE = 'crane'
 
 const LAYOUT_CORE_BUFFER = 4 // CEIL(radius)
 // Keep spawn center for first room.
@@ -186,7 +184,9 @@ class CityLayout {
 
   main () {
     if (!Game.rooms[this.data.room]) {
-      return this.suicide()
+      console.log("Layout planning -- cannot find room");
+      this.suicide()
+      return false
     }
 
     this.room = Game.rooms[this.data.room]
@@ -218,12 +218,15 @@ class CityLayout {
     }
     if (this.data.plan >= plans.length) {
       // Room probably can't support things
-      return this.suicide()
+      console.log("Room cannot support things");
+      this.suicide()
+      return false
     }
 
     // Actually run layout planning attempt.
     this.data.attempts++
     this[plans[this.data.plan]]()
+    return true
   }
 
   /**
@@ -639,21 +642,31 @@ class CityLayout {
 var save_layout_to_memory = function (room_name) {
     try {     
         var planner = new CityLayout(room_name)
+        var success = false
         while(!planner.__finished) {
-            planner.main()
+            success = planner.main()
         }
-        return true
+        if (!success) {
+            console.log("Layout planning failed.");
+        }
+        return success
     } catch (e) {
+        console.log("Save room layout to memory fail.");
+        console.log(e);
         return false
     }
 }
 
 // Returns true if successful, returns false otherwise 
 var create_next_construction_site = function (room_name) {
-    if (!save_layout_to_memory(room_name)) {
-        return false
-    }
     var room = Game.rooms[room_name]
+    if(!room.memory.construction_planned_flag) {
+        if (!save_layout_to_memory(room_name)) {
+            return false
+        } else {
+            room.memory.construction_planned_flag = true
+        }
+    }
     return room.constructNextMissingStructure()
 }
 

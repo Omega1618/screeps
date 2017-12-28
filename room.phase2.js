@@ -126,7 +126,8 @@ var try_spawn = function(room) {
 };
 
 var try_build = function(room) {
-    return room_layout.create_next_construction_site(room.name);
+    var success = room_layout.create_next_construction_site(room.name);
+    console.log("Was able to build: " + success);
 };
 
 var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( function(context) {

@@ -71,6 +71,7 @@ for (structure of structures) {
 Room.prototype.constructNextMissingStructure = function () {
   const structureType = this.getNextMissingStructureType()
   if (!structureType) {
+    console.log("No structure type")
     return false
   }
 
@@ -78,6 +79,7 @@ Room.prototype.constructNextMissingStructure = function () {
   if (structureType === STRUCTURE_EXTRACTOR) {
     const minerals = this.find(FIND_MINERALS)
     if (minerals.length <= 0) {
+      console.log("Tried to build extractor with no minerals")
       return false
     }
     return this.createConstructionSite(minerals[0].pos, STRUCTURE_EXTRACTOR)
@@ -86,10 +88,12 @@ Room.prototype.constructNextMissingStructure = function () {
   // Get room layout, if it exists, and use that to get structure positions.
   const layout = this.getLayout()
   if (!layout.isPlanned()) {
+    console.log("Construction not planned")
     return false
   }
   const allStructurePositions = layout.getAllStructures()
   if (!allStructurePositions[structureType]) {
+    console.log("No structure position found")
     return false
   }
 
@@ -119,12 +123,14 @@ Room.prototype.constructNextMissingStructure = function () {
 
 Room.prototype.getNextMissingStructureType = function () {
   if (!this.controller) {
+    console.log("Controller not found")
     return false
   }
   const structureCount = this.getStructureCount(FIND_STRUCTURES)
   const constructionCount = this.getConstructionCount()
   const nextLevel = this.getPracticalRoomLevel() + 1
   if (!LEVEL_BREAKDOWN[nextLevel]) {
+    console.log("Level breakdown not found")
     return false
   }
   const nextLevelStructureCount = LEVEL_BREAKDOWN[nextLevel]
@@ -138,6 +144,7 @@ Room.prototype.getNextMissingStructureType = function () {
   // Get room layout, if it exists, and use that to check which planned structureTypes are missing.
   const layout = this.getLayout()
   if (!layout.isPlanned()) {
+    console.log("Layout not planned")
     return false
   }
   const allStructurePositions = layout.getAllStructures()
@@ -170,6 +177,7 @@ Room.prototype.getNextMissingStructureType = function () {
       }
     }
   }
+  console.log("No structure needs to be built")
   return false
 }
 
@@ -334,11 +342,8 @@ class RoomLayout {
   _getStructureMap () {
     if (!this.structureMap) {
       var map = Game.rooms[this.roomname].memory[this._getSegmentLabel()]
-      if (!map) {
-        map = {}
-      }
-      if (map[this.roomname]) {
-        this.structureMap = PathFinder.CostMatrix.deserialize(map[this.roomname])
+      if (map) {
+        this.structureMap = PathFinder.CostMatrix.deserialize(map)
         this.unplanned = false
       } else {
         this.structureMap = new PathFinder.CostMatrix()
