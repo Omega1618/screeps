@@ -1,5 +1,4 @@
 var constants = require('creep.constants');
-var base_lib = require("room.base_position");
 var MultiQueue = require('utilities.queue');
 // var callback_util = require('utilities.call_back');
 
@@ -28,23 +27,6 @@ var spawn_creep = function(room, creep_module, energy) {
         creep_module.startup_creep(creep_memory);
     }
     return error_code;
-};
-
-var try_build_extension = function(room, first_spawn) {
-    var spawn = first_spawn;
-    var spawn_pos = spawn.pos;
-    var extention_poses = base_lib.getExtensionPositions();
-    var err_code = OK;
-    for(var i = 0; i < extention_poses.length; ++i) {
-        var dx = extention_poses[i][0];
-        var dy = extention_poses[i][1];
-        var ext_pos = new RoomPosition(spawn_pos.x + dx, spawn_pos.y + dy, room.name);
-        err_code = ext_pos.createConstructionSite(STRUCTURE_EXTENSION);
-        if (err_code != ERR_INVALID_TARGET) {
-            break;
-        }
-    }
-    return err_code;
 };
 
 var try_build_road_random = function(room) {
@@ -137,7 +119,6 @@ var transport_request_should_ignore = function(room, request) {
 
 module.exports = {
     spawn_creep: spawn_creep,
-    try_build_extension: try_build_extension,
     try_build_road_random: try_build_road_random,
     add_to_transport_queue: add_to_transport_queue,
     get_from_transport_queue: get_from_transport_queue,

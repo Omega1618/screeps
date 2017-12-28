@@ -1,6 +1,5 @@
 var phase1 = require("room.phase1");
 var phase2 = require("room.phase2");
-var base_lib = require("room.base_position");
 
 var num_extensions = function(room) {
     return room.find(FIND_MY_STRUCTURES, {filter: {structureType:STRUCTURE_EXTENSION}}).length;

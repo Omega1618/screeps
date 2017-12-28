@@ -164,7 +164,7 @@ var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( funct
 var make_spawn_energy_requests = function(room) {
     var targets = room.find(FIND_MY_STRUCTURES, {
                 filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                    return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_TOWER) &&
                         structure.energy < structure.energyCapacity && !(room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][structure.id]);
                 }
         });

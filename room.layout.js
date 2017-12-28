@@ -4,7 +4,7 @@
 // Note the order is important
 var _____ = require('roomvisual.prototype')
 var _____ = require('roomposition.prototype')
-var _____ = require("room.layout_prototype")
+var _____ = require("room.layout.prototype")
 var _____ = require('room.layout.roomsetting')
 
 const distanceTransform = require('room.layout.distancetransform')

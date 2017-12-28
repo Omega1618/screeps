@@ -71,7 +71,7 @@ for (structure of structures) {
 Room.prototype.constructNextMissingStructure = function () {
   const structureType = this.getNextMissingStructureType()
   if (!structureType) {
-    console.log("No structure type")
+    // console.log("No structure type")
     return false
   }
 
@@ -177,7 +177,7 @@ Room.prototype.getNextMissingStructureType = function () {
       }
     }
   }
-  console.log("No structure needs to be built. Practical level: " + (nextLevel - 1))
+  // console.log("No structure needs to be built. Practical level: " + (nextLevel - 1))
   return false
 }
 
