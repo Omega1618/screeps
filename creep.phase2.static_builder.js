@@ -43,6 +43,8 @@ var run = function(creep) {
         room_utils.add_to_transport_queue(creep.room, creep.memory.priority, request, is_source)
     }
     
+    if (creep.carry.energy <= 0) return;
+    
     if (creep.memory.target !== null) {
         if(Game.getObjectById(creep.memory.target) === null) creep.memory.target = null;
     }

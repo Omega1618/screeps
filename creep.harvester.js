@@ -14,7 +14,7 @@ var memory_init = function(room, creep_body) {
     
     var num_work = creep_body.filter(function(e) {return e == WORK}).length;
     
-    return {source_id:source, role: constants.role_enum.HARVESTER, num_work:num_work, no_path_counter:0};
+    return {source_id:source, role: constants.role_enum.HARVESTER, num_work:num_work, no_path_counter:0, harvest_target:null};
 };
 
 var startup_creep = function(creep_memory) {
@@ -67,15 +67,23 @@ var run = function(creep) {
         harvest_source(creep);
     }
     else {
-        var target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
-                        structure.energy < structure.energyCapacity;
-                }
-        });
+        var target = creep.memory.harvest_target;
+        if(!target) {
+            target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN) &&
+                            structure.energy < structure.energyCapacity;
+                    }
+            });
+            creep.memory.harvest_target = target;
+        }
         if(target) {
-            if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            var err_code = creep.transfer(target, RESOURCE_ENERGY);
+            if(err_code == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
+            }
+            if(!err_code) {
+                creep.memory.harvest_target = null;
             }
         }
     }

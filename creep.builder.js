@@ -5,6 +5,7 @@ var memory_init = function(room, creep_body) {
     var memory = roleHarvester.memory_init(room, creep_body);
     memory.role = constants.role_enum.BUILDER;
     memory.building = false;
+    memory.build_target = null;
     return memory;
 };
 
@@ -34,10 +35,25 @@ var run = function(creep) {
     }
 
     if(creep.memory.building) {
-        var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
-        if(targets.length) {
-            if(creep.build(targets[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(targets[0]);
+        var b_target = creep.memory.build_target;
+        if (b_target) {
+            b_target = Game.getObjectById(b_target);
+        }
+        
+        if (!b_target) {
+            var targets = creep.room.find(FIND_CONSTRUCTION_SITES);
+            if (targets.length) {
+                b_target = targets[0];
+                creep.memory.build_target = b_target.id;
+            } else {
+                b_target = null;
+                creep.memory.build_target = null;
+            }
+        }
+        
+        if(b_target) {
+            if(creep.build(b_target) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(b_target);
             }
         } else {
             var targets = creep.room.find(FIND_MY_STRUCTURES, {

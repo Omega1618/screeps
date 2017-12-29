@@ -3,6 +3,10 @@
 /**
  *
  * This class stays in its origin room
+ * Can steal transport creeps and other creeps from the origin room
+ * Should use the available energy in the storage to spawn defensive creeps if necessary.
+ * Should also refill the tower from storage if necessary (but don't get drained)
+ * Need to think about when to trigger safe mode
  *
  **/
  

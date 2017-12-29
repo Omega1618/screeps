@@ -43,6 +43,8 @@ var run = function(creep) {
         room_utils.add_to_transport_queue(creep.room, creep.memory.priority, request, is_source)
     }
     
+    if (creep.carry.energy <= 0) return;
+    
     if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
         creep.moveTo(creep.room.controller);
     }

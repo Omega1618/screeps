@@ -4,6 +4,8 @@
  * Also maintain a high and low priority queue to send things to.
  * 
  * Also maintain a list of which sources are being mined from and which need to be minded from
+ *
+ * This phase is not equipped to handle links and labs, consider making a new phase
  * 
  **/
 
@@ -167,13 +169,17 @@ var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( funct
     util.add_to_transport_queue(room, constants.SPAWNER_REQUEST_PRIORITY, new_request, is_source);
 });
 
-var make_spawn_energy_requests = function(room) {
+var make_structure_energy_requests = function(room) {
     var targets = room.find(FIND_MY_STRUCTURES, {
                 filter: (structure) => {
                     return (structure.structureType == STRUCTURE_EXTENSION || structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_TOWER) &&
                         structure.energy < structure.energyCapacity && !(room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][structure.id]);
                 }
         });
+    if (room.storage && _.sum(room.storage.store) < room.storage.storeCapacity) {
+        targets.push(room.storage);
+    }
+    
     targets.forEach(function(target){
         
         var new_request = Make_Transport_Request();
@@ -192,7 +198,7 @@ var run_room = function(room) {
     // var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
     var err_code = try_spawn(room);
     if (err_code == OK || Game.time % 20 == 0) {
-        make_spawn_energy_requests(room);
+        make_structure_energy_requests(room);
     }
     if (Game.time % 50 == 0 && room.controller.level >= 3) {
         // TODO, this may create a construction site.  Need to coordinate between building economic structures and building defense structures.
