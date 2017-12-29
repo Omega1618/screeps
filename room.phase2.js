@@ -73,7 +73,7 @@ var end_phase = function(room) {
 };
 
 var try_party = function (room) {
-    // TODO
+    // TODO, make sure you have enough CPU in the bucket
 }
 
 var try_spawn = function(room) {

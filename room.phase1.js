@@ -75,7 +75,8 @@ var try_build = function(room) {
     var success = room_layout.create_next_construction_site(room.name);
     console.log("Was able to build: " + success);
 };
- 
+
+// TODO this phase is very CPU inefficient.
 var run_room = function(room) {
     var ae = room.energyAvailable;
     var ac = room.energyCapacityAvailable;
@@ -83,6 +84,7 @@ var run_room = function(room) {
         var err_code = try_spawn(room, ae);
     }
     if (Game.time % 5 == 0 && room.memory[constants.NUM_BUILDERS]) {
+        // TODO cache construction site
         if(room.find(FIND_CONSTRUCTION_SITES).length == 0) {
             try_build(room);
         }

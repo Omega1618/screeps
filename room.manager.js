@@ -29,6 +29,9 @@ var check_switch_phase = function(room) {
 };
 
 var run_room = function(room) {
+    if(!room.controller.my) {
+        return;
+    }
     check_switch_phase(room);
     switch (room.memory.phase) {
         case 1:
