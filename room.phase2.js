@@ -188,7 +188,12 @@ var run_room = function(room) {
     if (err_code == OK || Game.time % 20 == 0) {
         make_spawn_energy_requests(room);
     }
+    if (Game.time % 50 == 0 && room.controller.level >= 3) {
+        // TODO, this may create a construction site.  Need to coordinate between building economic structures and building defense structures.
+        var defense_target = room_layout.get_next_defense_target(room.name);
+    }
     if (Game.time % 5 == 0 && room.memory[constants.NUM_STATIC_BUILDER]) {
+        // TODO cache construction site
         if(room.find(FIND_CONSTRUCTION_SITES).length == 0) {
             try_build(room);
         }

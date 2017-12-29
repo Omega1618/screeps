@@ -3,7 +3,7 @@ var Make_Transport_Request = require("utilities.transport_request");
 var room_utils = require('room.utilities'); 
 var callback_util = require('utilities.call_back');
 
-// TODO, this file is not close to done.
+// TODO, this file is not close to done. -- may be replaced by party.defense.js
 
 var memory_init = function(room) {
     return {room_name:room.name, energy_request:null, priority:null};

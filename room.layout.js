@@ -2,12 +2,13 @@
 
 // Adapted from https://github.com/ScreepsQuorum/screeps-quorum/
 // Note the order is important
-var _____ = require('roomvisual.prototype')
-var _____ = require('roomposition.prototype')
-var _____ = require("room.layout.prototype")
-var _____ = require('room.layout.roomsetting')
+const _____ = require('roomvisual.prototype')
+const _____ = require('roomposition.prototype')
+const _____ = require("room.layout.prototype")
+const _____ = require('room.layout.roomsetting')
 
 const distanceTransform = require('room.layout.distancetransform')
+const defense_planner = require('room.layout.defense')
 
 /**
  * Plan room structures
@@ -704,11 +705,11 @@ var plan_defense_layout = function (room_name) {
 // Returns true if successful, returns false otherwise
 // May create Wall or Rampart construction sites and then return their ID
 var get_next_defense_target = function(room_name) {
-    return false // delete after method is finished
     if (!plan_defense_layout(room_name)) {
         return false
     }
-    // TODO
+    var d_planner = new defense_planner(room_name)
+    return d_planner.main()
 }
 
 module.exports = {
