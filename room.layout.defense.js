@@ -128,9 +128,9 @@ class CityFortify {
       }
       var err_code = this.room.createConstructionSite(missing[0], type)
       if(!err_code) {
-          var sites = missing[0].lookFor(LOOK_CONSTRUCTION_SITES)
-          if (sites.length > 0) {
-              return sites[0]
+          const c_sites = missing[0].lookFor(LOOK_CONSTRUCTION_SITES)
+          if (c_sites.length > 0) {
+              return c_sites[0]
           }
       }
       return false

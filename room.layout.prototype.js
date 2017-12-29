@@ -559,7 +559,7 @@ class DefenseMap extends RoomLayout {
 
     while (queue.length > 0) {
       let current = queue.pop()
-      tested.push(current.serialize())
+      // tested.push(current.serialize())
 
       // If the value is greater than zero it has already been tested or is blocked by ramparts
       if (map.get(current.x, current.y) || walkableMap.get(current.x, current.y) >= TESTED_SPACE) {

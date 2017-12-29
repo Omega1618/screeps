@@ -120,11 +120,11 @@ var try_spawn = function(room) {
         upgrader_output_percentage = 1.0;
     }
     
-    if (builder_outgoing_energy < incoming_energy / 2.0) {
+    if (builder_outgoing_energy < incoming_energy * builder_output_percentage) {
         return util.spawn_creep(room, roleBuilder, ae);
     }
     
-    if (upgrader_outgoing_energy < incoming_energy / 2.0) {
+    if (upgrader_outgoing_energy < incoming_energy * upgrader_output_percentage) {
         return util.spawn_creep(room, roleUpgrader, ae);
     }
     
@@ -134,7 +134,7 @@ var try_spawn = function(room) {
 
 var try_build = function(room) {
     var success = room_layout.create_next_construction_site(room.name);
-    console.log("Was able to build: " + success);
+    // console.log("Was able to build: " + success);
 };
 
 var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( function(context) {

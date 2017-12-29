@@ -2,13 +2,14 @@
 
 // Adapted from https://github.com/ScreepsQuorum/screeps-quorum/
 // Note the order is important
-const _____ = require('roomvisual.prototype')
-const _____ = require('roomposition.prototype')
-const _____ = require("room.layout.prototype")
-const _____ = require('room.layout.roomsetting')
+var _____ = require('roomvisual.prototype')
+var _____ = require('roomposition.prototype')
+var _____ = require("room.layout.prototype")
+var _____ = require('room.layout.roomsetting')
+var _____ = require('room.layout.generic_prototype')
 
-const distanceTransform = require('room.layout.distancetransform')
-const defense_planner = require('room.layout.defense')
+var distanceTransform = require('room.layout.distancetransform')
+var defense_planner = require('room.layout.defense')
 
 /**
  * Plan room structures
