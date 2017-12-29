@@ -57,6 +57,7 @@ module.exports = {
     TRANSPORT_STRUCTURE_ENERGY_REQUEST: "er",
     STATIC_BUILDER_WORKER_PARTS: "n_sbwp",
     STATIC_UPGRADER_WORKER_PARTS: "n_suwp",
+    TRANSPORT_CARRY_PARTS: "n_twp",
     
     NUM_DROP_MINERS: "n_dm",
     NUM_STATIC_BUILDER: "n_sb",

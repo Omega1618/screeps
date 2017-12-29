@@ -52,6 +52,7 @@ var start_phase = function(room) {
     
     room.memory[constants.STATIC_BUILDER_WORKER_PARTS] = 0;
     room.memory[constants.STATIC_UPGRADER_WORKER_PARTS] = 0;
+    room.memory[constants.TRANSPORT_CARRY_PARTS] = 0;
 };
 
 var end_phase = function(room) {
@@ -68,6 +69,7 @@ var end_phase = function(room) {
     
     delete room.memory[constants.STATIC_BUILDER_WORKER_PARTS];
     delete room.memory[constants.STATIC_UPGRADER_WORKER_PARTS];
+    delete room.memory[constants.TRANSPORT_CARRY_PARTS];
 };
 
 var try_party = function (room) {
@@ -98,17 +100,6 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleMiner, ae);
     }
     
-    var queue_length = Math.min(util.get_transport_queue_length(room, true), util.get_transport_queue_length(room, false));
-    var total_sources = room.memory[constants.NUM_DROP_MINERS]*2 + room.memory[constants.NUM_STATIC_UPGRADER] + room.memory[constants.NUM_STATIC_BUILDER] + queue_length * 0.1;
-    var transport_multiplier = 1.0;
-    if (room.memory[constants.NUM_TRANSPORT] < total_sources * transport_multiplier) {
-        return util.spawn_creep(room, roleTransport, ae);
-    }
-    
-    if (room.memory[constants.NUM_REPAIRER] < 1) {
-        return util.spawn_creep(room, roleRepairer, ae);
-    }
-    
     var incoming_energy = room.memory[constants.NUM_SAFE_SOURCES] * 10; // TODO update this with source keeper sources and long distance mining.
     var builder_outgoing_energy = room.memory[constants.STATIC_BUILDER_WORKER_PARTS] * BUILD_POWER;
     var upgrader_outgoing_energy = room.memory[constants.STATIC_UPGRADER_WORKER_PARTS] * UPGRADE_CONTROLLER_POWER;
@@ -118,6 +109,21 @@ var try_spawn = function(room) {
     if (room.controller.level < 3) {
         builder_output_percentage = 0.0;
         upgrader_output_percentage = 1.0;
+    }
+    
+    // Assume transport creeps are multiples of [MOVE, CARRY, CARRY], assume each trip is from source to sink and back with no stops
+    // Assume averge trip distance is 25, from sink to source takes 25 ticks, from source to sink takes 50 ticks
+    // in 75 ticks 'incoming_energy * 75' is generated
+    // room.memory[constants.TRANSPORT_CARRY_PARTS] * 50 energy is removed from the system
+    // Hence the optimal transport carry parts is incoming_energy * 75 / 50 = incoming_energy * 1.5
+    // In general room.memory[constants.TRANSPORT_CARRY_PARTS] = incoming_energy * 1.5 * avg_dist / 50.0
+    // Could potentialy use a moving average of the number of ticks the transports take to calculate average distance
+    if (room.memory[constants.TRANSPORT_CARRY_PARTS] < incoming_energy * 1.5) {
+        return util.spawn_creep(room, roleTransport, ae);
+    }
+    
+    if (room.memory[constants.NUM_REPAIRER] < 1) {
+        return util.spawn_creep(room, roleRepairer, ae);
     }
     
     if (builder_outgoing_energy < incoming_energy * builder_output_percentage) {

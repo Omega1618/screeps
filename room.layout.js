@@ -684,9 +684,13 @@ var create_next_construction_site = function (room_name) {
 }
 
 var save_wall_layout_to_memory = function (room) { 
+    // TODO Current behavior is to never try to build defenses if
+    // generating the defense map fails once.  Maybe there is something smarter
+    // but changing this is low priority since it will only affect the first room.
     var def_map = room.getDefenseMap()
     def_map.generate()
     def_map.save()
+    return true
 }
 
 // Returns true if successful, returns false otherwise 

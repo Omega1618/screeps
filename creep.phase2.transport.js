@@ -4,17 +4,20 @@ var callback_util = require('utilities.call_back');
 var recyclerRole = require('creep.recycler');
 
 var memory_init = function(room, creep_body) {
-    return {request:null, find_source:true, role: constants.role_enum.TRANSPORT, room_name:room.name};
+    var num_carry = creep_body.filter(function(e) {return e == CARRY}).length;
+    return {request:null, find_source:true, num_carry:num_carry, role: constants.role_enum.TRANSPORT, room_name:room.name};
 };
 
 var startup_creep = function(creep_memory) {
     var room = Game.rooms[creep_memory.room_name];
     room.memory[constants.NUM_TRANSPORT] += 1;
+    room.memory[constants.TRANSPORT_CARRY_PARTS] += creep_memory.num_carry;
 };
 
 var shutdown_creep = function(creep_memory) {
     var room = Game.rooms[creep_memory.room_name];
     room.memory[constants.NUM_TRANSPORT] -= 1;
+    room.memory[constants.TRANSPORT_CARRY_PARTS] -= creep_memory.num_carry;
     
     var request = creep_memory.request;
     if (request !== null) {
