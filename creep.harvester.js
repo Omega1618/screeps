@@ -68,6 +68,10 @@ var run = function(creep) {
     }
     else {
         var target = creep.memory.harvest_target;
+        if (target) {
+            target = Game.getObjectById(target);
+        }
+        
         if(!target) {
             target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
                     filter: (structure) => {
@@ -75,7 +79,7 @@ var run = function(creep) {
                             structure.energy < structure.energyCapacity;
                     }
             });
-            creep.memory.harvest_target = target;
+            creep.memory.harvest_target = target.id;
         }
         if(target) {
             var err_code = creep.transfer(target, RESOURCE_ENERGY);
