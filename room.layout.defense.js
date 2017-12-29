@@ -11,6 +11,7 @@ const DECAY_LIMIT = 30000
 
 class CityFortify {
   constructor (room_name) {
+    this.data = {}
     this.data.room = room_name
   }
 
