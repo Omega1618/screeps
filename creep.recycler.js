@@ -91,6 +91,16 @@ var id_to_recycler = function(id, shutdown_fn) {
     }
 };
 
+var name_to_recycler = function(name, shutdown_fn) {
+    if (name) {
+        var creep = Game.creeps[name];
+        if (creep) {
+            become_recycler(creep, shutdown_fn);
+        }
+    }
+};
+
 module.exports = {memory_init:memory_init, run:run, startup_creep:startup_creep, shutdown_creep:shutdown_creep,
-                  suggested_body: suggested_body, become_recycler:become_recycler, id_to_recycler: id_to_recycler
+                  suggested_body: suggested_body, become_recycler:become_recycler, id_to_recycler: id_to_recycler,
+                  name_to_recycler: name_to_recycler
 };

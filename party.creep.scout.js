@@ -2,6 +2,7 @@
 // TODO this could probably just wrap around the transport role
 
 var constants = require('creep.constants');
+var stats_module = require('empire.stats');
 
 var memory_init = function(room, creep_body) {
     return {target_room_name:null, err_code: OK, finished: true, role: constants.role_enum.PARTY_SCOUT};
@@ -29,22 +30,26 @@ var run = function(creep) {
         }
         creep.memory.err_code = OK;
     }
+    
+    var last_tick = stats_module.get_room_stat(creep.room.name, stats_module.room_stat_names.LAST_UPDATE_TICK);
+    if(undefined === last_tick || Game.time - last_tick > CREEP_LIFE_TIME) {
+        stats_module.populate_room_stats(creep.room.name);
+    }
 };
 
 var suggested_body = function(energy) {
     return [MOVE];
 };
 
-var set_new_target = function(creep_id, room_name) {
-    if(creep_id) {
-        var creep = Game.getObjectById(creep_id);
-        if(creep) {
-            creep.memory.target_room_name = room_name;
-            creep.memory.finished = false;
-        }
-    }
+var set_new_target = function(creep, room_name) {
+    creep.memory.target_room_name = room_name;
+    creep.memory.finished = false;
+}
+
+var is_finished = function(creep) {
+    return creep.memory.finished;
 }
 
 module.exports = {memory_init:memory_init, run:run, startup_creep:startup_creep, shutdown_creep:shutdown_creep,
-                  suggested_body: suggested_body, set_new_target: set_new_target
+                  suggested_body: suggested_body, set_new_target: set_new_target, is_finished: is_finished
 };

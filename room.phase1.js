@@ -98,6 +98,9 @@ var run_room = function(room) {
 
 module.exports = {
     run_room: run_room,
+    can_help: function(room) {
+        return false;
+    },
     start_phase: start_phase,
     end_phase: end_phase
 };

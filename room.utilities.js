@@ -2,7 +2,7 @@ var constants = require('creep.constants');
 var MultiQueue = require('utilities.queue');
 // var callback_util = require('utilities.call_back');
 
-var spawn_creep = function(room, creep_module, energy) {
+var spawn_creep_with_name = function(room, creep_module, energy) {
     var spawners = room.find(FIND_MY_STRUCTURES, {
         filter: {structureType: STRUCTURE_SPAWN}
     });
@@ -26,7 +26,11 @@ var spawn_creep = function(room, creep_module, energy) {
         Memory.creep_counter = creep_counter + 1;
         creep_module.startup_creep(creep_memory);
     }
-    return error_code;
+    return {err_code: error_code, name: creep_name};
+};
+
+var spawn_creep = function(room, creep_module, energy) {
+    return spawn_creep_with_name(room, creep_module, energy).err_code;
 };
 
 var try_build_road_random = function(room) {
@@ -118,6 +122,7 @@ var transport_request_should_ignore = function(room, request) {
 };
 
 module.exports = {
+    spawn_creep_with_name: spawn_creep_with_name,
     spawn_creep: spawn_creep,
     try_build_road_random: try_build_road_random,
     add_to_transport_queue: add_to_transport_queue,

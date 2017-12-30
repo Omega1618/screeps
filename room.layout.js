@@ -1,6 +1,6 @@
 'use strict'
 
-// Adapted from https://github.com/ScreepsQuorum/screeps-quorum/
+// Adapted from https://github.com/ScreepsQuorum/screeps-quorum/ (and all imports here as well)
 // Note the order is important
 var _____ = require('roomvisual.prototype')
 var _____ = require('roomposition.prototype')

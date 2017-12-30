@@ -7,6 +7,7 @@ Rooms
 Room creeps
 Parties
 Party creeps
+Empire
 utilities
 
 # Rooms
@@ -28,6 +29,11 @@ The room creep analogy to parties.
 These creeps are controlled by the party, not the room.
 Parties are expected to ask rooms to generate these creeps.
 Files start with party.<party_name>.creep.
+
+# Empire
+Scripts related to running the entire empire.
+Currently only statistics are gathered.
+Files start with empire.
 
 # General design pattern
 creep's run method should be the only thing necessary to get the creep's work to be done.

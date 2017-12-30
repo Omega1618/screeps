@@ -62,7 +62,7 @@ var run_parties = function() {
     }
 };
 
-var create_party = fucntion(room, party_module_id) {
+var create_party = function(room, party_module_id) {
     var module = party_module_id_to_module[party_module_id];
     if (module === null) {
         return null;

@@ -76,6 +76,7 @@ var end_phase = function(room) {
 
 var try_party = function (room) {
     // TODO, make sure you have enough CPU in the bucket
+    // TODO, parties should use resources from the storage and should only be created if enough resources are available in the storage.
 }
 
 var try_spawn = function(room) {
@@ -164,7 +165,6 @@ var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( funct
     
     var is_source = false;
     var room = target.room;
-             
     
     util.add_to_transport_queue(room, constants.SPAWNER_REQUEST_PRIORITY, new_request, is_source);
 });
@@ -212,9 +212,16 @@ var run_room = function(room) {
     }
 };
 
+var can_help = function(room) {
+    return room.memory[constants.NUM_DROP_MINERS] >= room.memory[constants.SAFE_SOURCES].length
+            && room.memory[constants.NUM_TRANSPORT] >= 2
+            && room.memory[constants.NUM_REPAIRER] >= 1;
+};
+
 
 module.exports = {
     run_room: run_room,
+    can_help: can_help,
     start_phase: start_phase,
     end_phase: end_phase
 };

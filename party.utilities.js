@@ -1,84 +1,46 @@
-// TODO, totally not done, also need to set up Memory data strctures
+var scoutRole = require('party.creep.scout');
+var room_manager = require('room.mamanger');
+var room_utilities = require('room.utilities');
 
-// Party module should have the same methods as creep modules except without the 'suggested_body' method.  -- Also include an extra method to detect if the party is disbanded.
-// When a party module is created, it should check if Memory.parties exists and create it if it does not.
-// Parties should request resources, including spawning, from their home rooms.
-// Most parties should start with a scout to know what is needed.
-
-// This file should run all parties, regarless of rooms, and should run shutdown methods when parties are disbanded. -- Just like creep.utilities
-// Should also include a method for creating parties.
-
-var constants = require('creep.constants');
-
-var pe = constants.party_enum;
-var party_module_id_to_module = {};
-party_module_id_to_module[pe.DEFEND] = require('party.defend');
-party_module_id_to_module[pe.ATTACK] =  require('party.attack');
-party_module_id_to_module[pe.CLAIM] = require('party.claim');
-party_module_id_to_module[pe.LONG_DISTANCE_MINE] = require('party.long_distance_mine');
-party_module_id_to_module[pe.TRANSPORT] = require('party.transport');
-party_module_id_to_module[pe.MINE_POWER] = require('party.MINE_POWER');
-
-var get_module_from_id = function(party_id) {
-    var party_memory = Memory.parties[party_id];
-    for (var module_id in party_module_id_to_module) {
-        if(party_memory.module_id == module_id) {
-            return party_module_id_to_module[party_id];
+var get_creep_by_id = function(creep_id) {
+    if (creep_id) {
+        var creep = Game.getObjectById(creep_id);
+        if (creep) {
+            return creep;
         }
-    } 
+    }
     return null;
-}
-
-var run_party = function(party_id) {
-    var party_memory = Memory.parties[party_id];
-    get_module_from_id(party_id).run(party_memory);
 };
 
-var cleanup_party = function(party_id) {
-    var party_memory = Memory.parties[party_id];
-    get_module_from_id(party_id).shutdown(party_memory);
-	delete Memory.parties[party_id];
+// Returns undefined if the creep fails to spawn, otherwise returns the creep's name.
+var spawn_creep_get_name = function(room, creep_module, energy) {
+    var result = room_utilities.spawn_creep_with_name(roo, creep_module, energy);
+    if (result.err_code === OK) {
+        return result.name;
+    }
+    return undefined;
 };
 
-var run_parties = function() {
-    if (!_.has(Memory, 'parties')) {
-        Memory.parties = {};
+// Returns the creep name if spawned, otherwise returns undefined
+// Don't use this if the party has a high priority, this can wait for a long time.
+var scout_room = function (scout_name, target_room_name, origin_room) {
+    var scout = scout_name;
+    if (scout) {
+        scout = Game.creeps[scout_name];
     }
-    
-    for (let party_id in Memory.parties) {
-        var party_memory = Memory.parties[party_id];
-        var module = get_module_from_id(party_id);
-        
-    	if (module.should_disband(party_memory)){
-    		cleanup_party(party_id);
-    	} else {
-            run_party(party_id);
-    	}
+    if (scout) {
+        if (!scoutRole.is_finished(scout) || scout.spawning) return undefined;
+        scoutRole.set_new_target(target_room_name);
+        return undefined;
     }
-};
-
-var create_party = fucntion(room, party_module_id) {
-    var module = get_module_from_id(party_module_id);
-    if (module === null) {
-        return null;
+    if (room_manager.can_help(origin_room)) {
+        return spawn_creep_get_name(origin_room, scoutRole, 50);
     }
-    // TODO Potential overflow error
-    var party_id = Memory.party_counter | 0;
-    var party_memory = module.memory_init(room);
-    if (!party_memory) {
-        return null;
-    }
-    // We assume Memory.parties exists
-    Memory.parties[party_id] = party_memory;
-    module.startup(party_memory);
-    Memory.party_counter = party_id + 1;
-    return party_id;
+    return undefined;
 };
 
 module.exports = {
-    run_parties: run_parties,
-    create_party: create_party,
-    
-    run_party: run_party,
-    cleanup_party: cleanup_party
+    get_creep_by_id: get_creep_by_id,
+    spawn_creep_get_name: spawn_creep_get_name,
+    scout_room: scout_room
 };

@@ -45,9 +45,24 @@ var run_room = function(room) {
     }
 };
 
+var can_help = function(room) {
+    if(!room.controller.my) {
+        return false;
+    }
+    switch (room.memory.phase) {
+        case 1:
+            return phase1.can_help(room);
+        case 2:
+            return phase2.can_help(room);
+        default:
+            return false;
+    }
+}
+
 module.exports = {
     /** @param {Room} room **/
     run_room: run_room,
+    can_help: can_help,
     
     run_rooms: function() {
         for(var name in Game.rooms) {
