@@ -79,7 +79,7 @@ var run = function(creep) {
                             structure.energy < structure.energyCapacity;
                     }
             });
-            creep.memory.harvest_target = target.id;
+            if (target) creep.memory.harvest_target = target.id;
         }
         if(target) {
             var err_code = creep.transfer(target, RESOURCE_ENERGY);
