@@ -17,7 +17,6 @@
  * For example, if we find no good sources or all adjacent rooms are occupied or all adjacent rooms are already being mined.
  **/
  
- 
 var constants = require('creep.constants');
 var stats_module = require('empire.stats');
 var party_util = require('party.utilities');
@@ -125,7 +124,7 @@ var run = function (party_memory) {
     // Target exists
     
     if (!party_memory.miner_name) {
-        
+        // TODO
     }
     
    // TODO
