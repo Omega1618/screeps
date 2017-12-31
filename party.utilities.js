@@ -30,7 +30,7 @@ var scout_room = function (scout_name, target_room_name, origin_room) {
     }
     if (scout) {
         if (!scoutRole.is_finished(scout) || scout.spawning) return undefined;
-        scoutRole.set_new_target(target_room_name);
+        scoutRole.set_new_target(scout, target_room_name);
         return undefined;
     }
     if (room_manager.can_help(origin_room)) {

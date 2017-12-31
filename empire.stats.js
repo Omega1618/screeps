@@ -1,3 +1,4 @@
+// TODO may want to change the source locations stat to track which are in range of source keepers
 
 var empire_stat_names = {
     LAST_UPDATE_TICK:0
@@ -6,8 +7,9 @@ var empire_stat_names = {
 // TODO, consider adding a check for if the room had hostile creeps upon arrival, and record the owner(s).
 var room_stat_names = {
     LAST_UPDATE_TICK:0,
-    SOURCE_LOCATIONS:1, // Returns a list of objects that have {x: ..., y: ...}
-    HOSTILE:2 // returns the room controller level if it is hostile and otherwise undefined (this means rooms that are known to not be hostile are also marked as undefined)
+    SOURCE_LOCATIONS:1, // Returns a list of objects that have {x: ..., y: ..., id: source's id}
+    HOSTILE:2, // returns the room controller level if it is hostile and otherwise undefined (this means rooms that are known to not be hostile are also marked as undefined)
+    CONTAINS_SOURCE_KEEPER:3
 };
 
 var update_hostile_room_stat = function (room_name) {
@@ -58,7 +60,8 @@ var populate_room_stats = function (room_name) {
     
     stats[room_stat_names.LAST_UPDATE_TICK] = Game.tick;
     update_hostile_room_stat(room_name);
-    stats[room_stat_names.SOURCE_LOCATIONS] = _.map(room.find(FIND_SOURCES), function (pos) { return {x:pos.x, y:pos.y}});
+    stats[room_stat_names.SOURCE_LOCATIONS] = _.map(room.find(FIND_SOURCES), function (source) { return {x:source.pos.x, y:source.pos.y, id:source.id}} );
+    stats[room_stat_names.CONTAINS_SOURCE_KEEPER] = room.find(FIND_HOSTILE_STRUCTURES, {filter: {structureType: STRUCTURE_KEEPER_LAIR}}).length > 0;    
     
     return true;
 };

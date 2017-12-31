@@ -4,9 +4,10 @@
 
 var constants = require('creep.constants');
 var roleTransport = require('creep.phase2.transport');
+var callback_util = require('utilities.call_back');
 
 var memory_init = function(room, creep_body) {
-    return {request: null, move_to_room: null, err_code: OK, finished: true, role: constants.role_enum.PARTY_TRANSPORT};
+    return {request: null, target_room_name: null, err_code: OK, finished: true, role: constants.role_enum.PARTY_TRANSPORT};
 };
 
 var startup_creep = function(creep_memory) {
@@ -19,10 +20,25 @@ var shutdown_creep = function(creep_memory) {
 var run = function(creep) {
     var request = creep.memory.request;
     if (request) {
-        // TODO
+        var result = roleTransport.run_request(creep, request);
+        var err_code = result.err_code;
+        var target = result.target;
+        
+        if(err_code == ERR_NOT_IN_RANGE) {
+            creep.travelTo(target);
+            creep.memory.err_code = err_code;
+        } else if (err_code == OK || err_code == ERR_INVALID_TARGET || err_code == ERR_NOT_OWNER || err_code == ERR_NO_BODYPART
+                    || err_code == ERR_NOT_ENOUGH_ENERGY || err_code == ERR_NOT_ENOUGH_RESOURCES) {
+            // console.log("Completed request");
+            callback_util.exec(request.end_callback);
+            creep.memory.request = null;
+            creep.memory.err_code = err_code;
+            creep.memory.finished = true;
+        }
         return;
     }
-    var target_room_name = creep.memory.move_to_room;
+    
+    var target_room_name = creep.memory.target_room_name;
     if (target_room_name) {
         if(target_room_name != creep.room.name) {
             creep.memory.err_code = creep.travelTo(new RoomPos(25, 25, target_room_name));
@@ -32,7 +48,7 @@ var run = function(creep) {
                 creep.memory.err_code = creep.travelTo(new RoomPos(25, 25, target_room_name));
             }
             creep.memory.err_code = OK;
-            creep.memory.move_to_room = null;
+            creep.memory.target_room_name = null;
         }
     }
 
@@ -52,34 +68,30 @@ var suggested_body = function(energy) {
     return body;
 };
 
-var move_to_room = function(creep_id, room_name) {
-    if(creep_id) {
-        var creep = Game.getObjectById(creep_id);
-        if(creep) {
-            if (!creep.memory.finished) {
-                return ERR_BUSY;
-            }
-            creep.memory.target_room_name = room_name;
-            return OK;
+var move_to_room = function(creep, room_name) {
+    if(creep && room_name) {
+        if (!creep.memory.finished) {
+            return ERR_BUSY;
         }
+        creep.memory.target_room_name = room_name;
+        return OK;
     }
     return ERR_INVALID_ARGS;
-}
+};
 
-var add_request = function(creep_id, request) {
-    if(creep_id) {
-        var creep = Game.getObjectById(creep_id);
-        if(creep) {
-            if (!creep.memory.finished) {
-                return ERR_BUSY;
-            }
-            creep.memory.request = request;
-            return OK;
+var add_request = function(creep, request) {
+    if(creep && request) {
+        if (!creep.memory.finished) {
+            return ERR_BUSY;
         }
+        callback_util.exec(request.start_callback);
+        creep.memory.request = request;
+        creep.memory.finished = false;
+        return OK;
     }
     return ERR_INVALID_ARGS;
-}
+};
 
 module.exports = {memory_init:memory_init, run:run, startup_creep:startup_creep, shutdown_creep:shutdown_creep,
-                  suggested_body: suggested_body, move_to_room: move_to_room
+                  suggested_body: suggested_body, move_to_room: move_to_room, add_request: add_request
 };

@@ -14,7 +14,8 @@
  * TODO -- should also be aware of threating creeps and stop requesting resources if they appear (and also alert surrounding rooms of threat)
  * TODO -- in the future you may want to avoid mining from rooms adjacent to hostile rooms.
  * TODO -- need to communicate to the origin room on whether it makes sense to try to create this party.  
- * For example, if we find no good sources or all adjacent rooms are occupied or all adjacent rooms are already being mined.
+ *      For example, if we find no good sources or all adjacent rooms are occupied or all adjacent rooms are already being mined.
+ *      Should put this in stats but have it be set here.
  * TODO need to calculate the correct amount of WORKER parts on MINERS and CARRY parts on harvesters for both unreserved and reserved rooms.
  *          For now just assume things aren't reserved and use a fixed size miner and transporter.
  **/
@@ -34,7 +35,7 @@ var transportRole = require('party.creep.transport');
     scout_name: null,
     adjacent_rooms: null, 
     // Mining info
-    target_room: null,
+    source_object: null,
     miner_name: null,
     transport_names: [],
     finished: false,
@@ -53,49 +54,73 @@ var find_target_room = function(party_memory) {
     var origin_room = Game.rooms[party_memory.origin_room_name];
     // Find adjacent sources and trigger a scout if a room's information is missing.
     var adj_rooms = party_memory.adjacent_rooms;
-    var all_rooms_scouted = true;
     var adj_sources = [];
     
     for (let direction in adj_rooms) {
         var adj_room_name = adj_rooms[direction];
         
-        // Skip over hostile rooms and my rooms and rooms that already have a remote mining party in them.
-        var is_hostile = stats_module.get_room_stat(adj_room_name, stats_module.room_stat_names.HOSTILE);
-        if (is_hostile) {
-            continue;
-        }
-        if (Game.rooms[adj_room_name] && Game.rooms[adj_room_name].room.controller && Game.rooms[adj_room_name].room.controller.my) {
-            continue
-        }
-        // TODO check for existing remote mining parties.
-        
+        // Get the room's sources and check if it needs to be scouted
         var room_sources = stats_module.get_room_stat(adj_room_name, stats_module.room_stat_names.SOURCE_LOCATIONS);
-        if (room_sources) {
-            room_sources.forEach(function(pos) {
-                adj_sources.push(new RoomPosition(pos.x, pos.y, adj_room_name));
-            });
-        } else {
+        if (!room_sources) {
             var scout_name = party_util.scout_room(party_memory.scout_name, adj_room_name, origin_room);
             if (scout_name) {
                 party_memory.scout_name = scout_name;
             }
-            all_rooms_scouted = false;
-            break;
+            return;
         }
-    }
-    if (!all_rooms_scouted) {
-        return;
+        
+        // Skip over hostile rooms, my rooms, rooms with source keepers, and rooms that already have a remote mining party in them.
+        var is_hostile = stats_module.get_room_stat(adj_room_name, stats_module.room_stat_names.HOSTILE);
+        if (is_hostile) continue;
+        if (Game.rooms[adj_room_name] && Game.rooms[adj_room_name].room.controller && Game.rooms[adj_room_name].room.controller.my) continue;
+        // TODO may want to check individual sources for source keeps instead of whole rooms, will have to change stats.
+        var has_source_keeper = stats_module.get_room_stat(adj_room_name, stats_module.room_stat_names.CONTAINS_SOURCE_KEEPER);
+        if (has_source_keeper) continue;
+        // TODO check for existing remote mining parties.
+        
+        room_sources.forEach(function(source_stat_obj) {
+            adj_sources.push({
+                pos: new RoomPosition(source_stat_obj.x, source_stat_obj.y, adj_room_name), 
+                id: source_stat_obj.id
+            });
+        });
     }
 
-    // set party_memory.target_room
-    var origin_mid_point = new RoomPosition(25, 25, party_memory.origin_room_name);
-    var target = origin_mid_point.findClosestByRange(adj_sources);
+    // set party_memory.source_object
+    var origin_mid_point = new RoomPosition(25, 25, party_memory.origin_room_name); // TODO change this to be the first spawn in the room's list of spawns
+    var target = _.minBy(adj_sources, function (adj_s) {
+        return origin_mid_point.getRangeTo(adj_s.pos);
+    });
     if (target) {
-        party_memory.target_room = target.roomName;
+        // TODO set which source is being mined from and its locations
+        // TODO mark the mined source as being mined (set the in_use proprty in the source location object in stats to true).
+        party_memory.source_object = target;
     } else {
         party_memory.finished = true;
     }
 }
+
+var transport_helper = function(creep) {
+    if (!transport.memory.finished) {
+        return ERR_BUSY;
+    }
+    
+    var should_return_energy = creep.memory.should_return_energy;
+    if (should_return_energy) {
+        should_return_energy = creep.carry.energy >= creep.carryCapacity * 0.05;
+    } else {
+        should_return_energy = creep.carry.energy >= creep.carryCapacity;
+    }
+    creep.memory.should_return_energy = should_return_energy;
+    
+    // TODO, should also make a request in the room of origin to pick up energy from the transport creep if need be.
+    if (should_return_energy) {
+        // TODO
+    } else {
+        // TODO make a request to pickup from the miner
+        return transportRole.add_request(creep, );
+    }
+};
 
 var run = function (party_memory) {
     if (party_memory.finished) {
@@ -107,9 +132,9 @@ var run = function (party_memory) {
         return;
     }
         
-    if (!party_memory.target_room) {
+    if (!party_memory.source_object) {
         find_target_room(party_memory);
-        if (!party_memory.target_room) {
+        if (!party_memory.source_object) {
             return;
         }
         
@@ -143,7 +168,7 @@ var run = function (party_memory) {
         miner = Game.creeps[miner];
     }
     if (miner) {
-        // TODO
+        minerRole.set_new_target(miner, party_memory.source_object.pos.roomName, party_memory.source_object.id);
     } else {
         party_memory.miner_name = null;
     }
@@ -156,7 +181,7 @@ var run = function (party_memory) {
             transport = Game.creeps[transport];
         }
         if (transport) {
-            // TODO
+            transport_helper(transport);
             new_tansport_names.push(transport.name);
         } 
     }
@@ -174,6 +199,7 @@ var force_disband = function (party_memory) {
 };
  
  var shutdown = function (party_memory) {
+     // TODO mark the mined source as no longer being mined (delete the in_use proprty from the source location object in stats). -- don't just modify the source object in your memory
     recyclerRole.name_to_recycler(party_memory.scout_name, scoutRole.shutdown_creep);
     recyclerRole.name_to_recycler(party_memory.miner_name, minerRole.shutdown_creep);
     for (var i = 0; i < transport_ids.length; ++i) {

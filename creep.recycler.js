@@ -50,7 +50,6 @@ var run = function(creep) {
                 filter: { structureType: STRUCTURE_SPAWN }
         });
         // TODO check if the room has a transport queue, and if it does not then suicide
-        // TODO also suicide if no move parts that work
         if (spawners.length == 0) {
             creep.suicide();
             return;
@@ -64,7 +63,10 @@ var run = function(creep) {
     var spawner = Game.getObjectById(creep.memory.spawner);
     var err_code = spawner.recycleCreep(creep);
     if (err_code == ERR_NOT_IN_RANGE) {
-        creep.moveTo(spawner);
+        var err_code = creep.moveTo(spawner);
+        if (err_code == ERR_NO_BODYPART) {
+            creep.suicide();
+        }
     }
 };
 

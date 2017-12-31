@@ -95,12 +95,16 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleTransport, ae);
     }
     
-    if (ac - ae > 0) {
+    if (ae < 550 && ac - ae > 0) {
         return ERR_NOT_ENOUGH_ENERGY;
     }
     
     if (room.memory[constants.NUM_DROP_MINERS] <  room.memory[constants.SAFE_SOURCES].length) {
         return util.spawn_creep(room, roleMiner, ae);
+    }
+    
+    if (ac - ae > 0) {
+        return ERR_NOT_ENOUGH_ENERGY;
     }
     
     var incoming_energy = room.memory[constants.NUM_SAFE_SOURCES] * 10; // TODO update this with source keeper sources and long distance mining.

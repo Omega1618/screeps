@@ -43,8 +43,6 @@ var run = function(creep) {
         room_utils.add_to_transport_queue(creep.room, creep.memory.priority, request, is_source)
     }
     
-    if (creep.carry.energy <= 0) return;
-    
     if (creep.memory.target !== null) {
         if(Game.getObjectById(creep.memory.target) === null) creep.memory.target = null;
     }
@@ -82,6 +80,15 @@ var suggested_body = function(energy) {
             energy -= 50;
         }
     }
+    
+    for(var i = 0; i < 1 && energy >= 300; ++i) {
+        body.push(MOVE);
+        body.push(CARRY);
+        body.push(WORK);
+        body.push(WORK);
+        energy -= 300;
+    }
+    
     return body;
 };
 

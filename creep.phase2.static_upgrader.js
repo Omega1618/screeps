@@ -5,7 +5,7 @@ var callback_util = require('utilities.call_back');
 
 var memory_init = function(room, creep_body) {
     var num_work = creep_body.filter(function(e) {return e == WORK}).length;
-    return {room_name:room.name, role: constants.role_enum.STATIC_UPGRADER, num_work:num_work, energy_request:null, priority:null};
+    return {room_name:room.name, role: constants.role_enum.STATIC_UPGRADER, num_work:num_work, energy_request:null, priority:null, done_moving:false};
 };
 
 var startup_creep = function(creep_memory) {
@@ -43,10 +43,16 @@ var run = function(creep) {
         room_utils.add_to_transport_queue(creep.room, creep.memory.priority, request, is_source)
     }
     
-    if (creep.carry.energy <= 0) return;
+    if (!creep.room.controller) return;
     
-    if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-        creep.moveTo(creep.room.controller);
+    if (creep.memory.done_moving || creep.pos.inRangeTo(room.controller, 1)) {
+        creep.memory.done_moving = true;
+        if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+            creep.moveTo(creep.room.controller);
+        }
+    } else {
+        var err_code = creep.moveTo(creep.room.controller);
+        creep.memory.done_moving = err_code === ERR_NO_PATH;
     }
 };
 
@@ -74,6 +80,14 @@ var suggested_body = function(energy) {
     if (energy >= 100) {
         body.push(WORK);
         energy -= 100;
+    }
+
+    for(var i = 0; i < 5 && energy >= 300; ++i) {
+        body.push(MOVE);
+        body.push(CARRY);
+        body.push(WORK);
+        body.push(WORK);
+        energy -= 300;
     }
     return body;
 };

@@ -93,7 +93,25 @@ var parse_source = function(creep, request) {
          err_code = OK;
      }
      return [source, err_code];
- }
+ };
+ 
+ var run_request = function (creep, request) {
+    var err_code = ERR_NOT_IN_RANGE;
+    var target = request.target;
+    if (request.target === undefined) {
+        var result = parse_source(creep, request);
+        target = result[0];
+        err_code = result[1];
+    } else {
+        target = Game.getObjectById(target);
+        err_code = creep.transfer(target, request.type);
+        // console.log("actual err code: " + err_code);
+        if (err_code == ERR_FULL || err_code == ERR_NOT_ENOUGH_RESOURCES) {
+            err_code = OK;
+        }
+    }
+    return {err_code:err_code, target:target};
+ };
  
 /** @param {Creep} creep **/
 var run = function(creep) {
@@ -109,20 +127,9 @@ var run = function(creep) {
         return;
     }
     
-    var err_code = ERR_NOT_IN_RANGE;
-    var target = request.target;
-    if (request.target === undefined) {
-        var result = parse_source(creep, request);
-        target = result[0];
-        err_code = result[1];
-    } else {
-        target = Game.getObjectById(target);
-        err_code = creep.transfer(target, request.type);
-        // console.log("actual err code: " + err_code);
-        if (err_code == ERR_FULL || err_code == ERR_NOT_ENOUGH_RESOURCES) {
-            err_code = OK;
-        }
-    }
+    var result = run_request(creep, request);
+    var err_code = result.err_code;
+    var target = result.target;
     
     // console.log("Error code: " + err_code);
     if(err_code == ERR_NOT_IN_RANGE) {
@@ -167,5 +174,5 @@ var suggested_body = function(energy) {
 };
 
 module.exports = {memory_init:memory_init, run:run, startup_creep:startup_creep, shutdown_creep:shutdown_creep,
-                  suggested_body: suggested_body, parse_source:parse_source
+                  suggested_body: suggested_body, run_request:run_request
 };
