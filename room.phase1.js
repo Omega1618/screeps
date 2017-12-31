@@ -73,7 +73,7 @@ var try_spawn = function(room, ae) {
 
 var try_build = function(room) {
     var success = room_layout.create_next_construction_site(room.name);
-    console.log("Was able to build: " + success);
+    // console.log("Was able to build: " + success);
 };
 
 // TODO this phase is very CPU inefficient.

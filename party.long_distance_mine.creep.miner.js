@@ -62,6 +62,7 @@ var suggested_body = function(energy) {
     var body = [];
     for (var i = 0; i < full_body.length && energy >= 0; ++i) {
         body.push(full_body[i]);
+        energy -= BODYPART_COST[full_body[i]];
     }
     body.pop();
     return body;

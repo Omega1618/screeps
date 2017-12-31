@@ -14,7 +14,7 @@ var get_creep_by_id = function(creep_id) {
 
 // Returns undefined if the creep fails to spawn, otherwise returns the creep's name.
 var spawn_creep_get_name = function(room, creep_module, energy) {
-    var result = room_utilities.spawn_creep_with_name(roo, creep_module, energy);
+    var result = room_utilities.spawn_creep_with_name(room, creep_module, energy);
     if (result.err_code === OK) {
         return result.name;
     }
@@ -42,5 +42,6 @@ var scout_room = function (scout_name, target_room_name, origin_room) {
 module.exports = {
     get_creep_by_id: get_creep_by_id,
     spawn_creep_get_name: spawn_creep_get_name,
+    can_help: room_manager.can_help,
     scout_room: scout_room
 };

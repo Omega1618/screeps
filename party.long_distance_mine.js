@@ -15,6 +15,8 @@
  * TODO -- in the future you may want to avoid mining from rooms adjacent to hostile rooms.
  * TODO -- need to communicate to the origin room on whether it makes sense to try to create this party.  
  * For example, if we find no good sources or all adjacent rooms are occupied or all adjacent rooms are already being mined.
+ * TODO need to calculate the correct amount of WORKER parts on MINERS and CARRY parts on harvesters for both unreserved and reserved rooms.
+ *          For now just assume things aren't reserved and use a fixed size miner and transporter.
  **/
  
 var constants = require('creep.constants');
@@ -23,8 +25,8 @@ var party_util = require('party.utilities');
  
 var recyclerRole = require('creep.recycler');
 var scoutRole = require('party.creep.scout');
-var minerRole = require('');
-var transportRole = require('');
+var minerRole = require('party.long_distance_mine.creep.miner');
+var transportRole = require('party.creep.transport');
 
  var memory_init = function (room_of_origin) {
     return {origin_room_name: room_of_origin.name,
@@ -123,8 +125,40 @@ var run = function (party_memory) {
     } 
     // Target exists
     
-    if (!party_memory.miner_name) {
+    // Spawn things we don't have
+    if (!party_memory.miner_name && party_util.can_help(origin_room) && origin_room.availableEnergy >= 400) {
+        var miner_name = spawn_creep_get_name(origin_room, minerRole, 400);
+        if (miner_name) {
+            party_memory.miner_name = miner_name;
+        }
+    } else if (party_memory.transport_names.length == 0 && party_util.can_help(origin_room) && origin_room.availableEnergy >= 450) {
+        var transport_name = spawn_creep_get_name(origin_room, transportRole, 450);
+        if (transport_name) {
+            party_memory.transport_names.push(transport_name);
+        }
+    }
+    
+    var miner = party_memory.miner_name;
+    if (miner) {
+        miner = Game.creeps[miner];
+    }
+    if (miner) {
         // TODO
+    } else {
+        party_memory.miner_name = null;
+    }
+    
+    var old_transport_names = party_memory.transport_names;
+    var new_tansport_names = [];
+    for (var i = 0; i < old_transport_names.length; ++i) {
+        var transport = old_transport_names[i];
+        if (transport) {
+            transport = Game.creeps[transport];
+        }
+        if (transport) {
+            // TODO
+            new_tansport_names.push(transport.name);
+        } 
     }
     
    // TODO
