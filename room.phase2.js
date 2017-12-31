@@ -153,9 +153,11 @@ var try_build = function(room) {
 var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( function(context) {
     var request = context.request;
     var cb_fn_id = context.cb_fn_id;
+    var room_name = context.room_name;
+    
     var target = Game.getObjectById(request.target);
-    if (target.energy == target.energyCapacity) {
-        target.room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = false;
+    if (!target || target.energy == target.energyCapacity) {
+        delete Game.rooms[room_name].memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][request.target];
         return;
     }
     target.room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = true;
@@ -180,7 +182,8 @@ var make_structure_energy_requests = function(room) {
                         structure.energy < structure.energyCapacity && !(room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][structure.id]);
                 }
         });
-    if (room.storage && _.sum(room.storage.store) < room.storage.storeCapacity) {
+    if (room.storage && _.sum(room.storage.store) < room.storage.storeCapacity && 
+        !(room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][room.storage.id])) {
         targets.push(room.storage);
     }
     
@@ -189,7 +192,8 @@ var make_structure_energy_requests = function(room) {
         var new_request = Make_Transport_Request();
         new_request.target = target.id;
         new_request.type = RESOURCE_ENERGY;
-        new_request.end_callback = callback_util.register_callback(renew_if_not_full_callback_fn_id, {request: new_request, cb_fn_id: renew_if_not_full_callback_fn_id});
+        new_request.end_callback = callback_util.register_callback(renew_if_not_full_callback_fn_id, 
+                    {request: new_request, cb_fn_id: renew_if_not_full_callback_fn_id, room_name: room.name});
         
         room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = true;
         
