@@ -23,6 +23,9 @@
 var constants = require('creep.constants');
 var stats_module = require('empire.stats');
 var party_util = require('party.utilities');
+var room_utils = require('room.utilities'); 
+var callback_util = require('utilities.call_back');
+var Make_Transport_Request = require("utilities.transport_request");
  
 var recyclerRole = require('creep.recycler');
 var scoutRole = require('party.creep.scout');
@@ -100,8 +103,15 @@ var find_target_room = function(party_memory) {
     }
 }
 
-var transport_helper = function(creep) {
-    if (!transport.memory.finished) {
+var transport_reset_request_callback = callback_util.register_callback_fn( function(creep_name) {
+    var creep = Game.creeps[creep_name];
+    if (creep && creep.memory.pickup_request) {
+        delete creep.memory.pickup_request;
+    }
+});
+
+var transport_helper = function(creep, party_memory) {
+    if (!creep.memory.finished || creep.memory.pickup_request) {
         return ERR_BUSY;
     }
     
@@ -111,14 +121,38 @@ var transport_helper = function(creep) {
     } else {
         should_return_energy = creep.carry.energy >= creep.carryCapacity;
     }
+    
+    var miner = party_memory.miner_name;
+    if (miner) {
+        miner = Game.creeps[miner];
+    }
+    if (!miner) {
+        should_return_energy = true;
+    }
+    
     creep.memory.should_return_energy = should_return_energy;
     
-    // TODO, should also make a request in the room of origin to pick up energy from the transport creep if need be.
     if (should_return_energy) {
-        // TODO
+        if (creep.room.name == party_memory.origin_room_name) {
+            var request = Make_Transport_Request();
+            request.source = creep.id;
+            request.type = RESOURCE_ENERGY;
+            request.source_type = constants.TRANSPORT_SOURCE_TYPES.CREEP;
+            request.end_callback = callback_util.register_callback(transport_reset_request_callback, creep.name);
+            
+            creep.memory.pickup_request = request;
+            
+            room_utils.add_to_transport_queue(creep.room, constants.REMOTE_MINING_IMPORT_PRIORITY, request, true);
+        } else {
+            return transportRole.move_to_room(creep, party_memory.origin_room_name);
+        }
     } else {
-        // TODO make a request to pickup from the miner
-        return transportRole.add_request(creep, );
+        var request = Make_Transport_Request();
+        request.source = miner.pos;
+        request.type = RESOURCE_ENERGY;
+        request.source_type = constants.TRANSPORT_SOURCE_TYPES.POSITION;
+        
+        return transportRole.add_request(creep, request);
     }
 };
 
@@ -181,10 +215,11 @@ var run = function (party_memory) {
             transport = Game.creeps[transport];
         }
         if (transport) {
-            transport_helper(transport);
+            transport_helper(transport, party_memory);
             new_tansport_names.push(transport.name);
         } 
     }
+    party_memory.transport_names = new_tansport_names;
     
    // TODO
    // disband when drop miner dies

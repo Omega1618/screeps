@@ -85,6 +85,7 @@ module.exports = {
     // Sources
     DROP_MINIER_PRIORITY: 0,
     DROP_MINIER_HIGH_PRIORITY: 1,
+    REMOTE_MINING_IMPORT_PRIORITY: 2,
     
     // Sinks
     SPAWNER_REQUEST_PRIORITY: 0,

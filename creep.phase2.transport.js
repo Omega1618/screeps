@@ -75,10 +75,18 @@ var parse_source = function(creep, request) {
              break;
          case constants.TRANSPORT_SOURCE_TYPES.RESOURCE:
              source = Game.getObjectById(source);
+             if (!source) {
+                 err_code = OK;
+                 break;
+             }
              err_code = creep.pickup(source);
              break;
          case constants.TRANSPORT_SOURCE_TYPES.CREEP:
              source = Game.getObjectById(source);
+             if (!source) {
+                 err_code = OK;
+                 break;
+             }
              err_code = source.transfer(creep, request.type);
              if (err_code != ERR_BUSY && err_code != ERR_NOT_IN_RANGE) {
                  err_code = OK;
@@ -86,6 +94,10 @@ var parse_source = function(creep, request) {
              break;
          case constants.TRANSPORT_SOURCE_TYPES.STRUCTURE:
              source = Game.getObjectById(source);
+             if (!source) {
+                 err_code = OK;
+                 break;
+             }
              err_code = creep.withdraw(source, request.type);
              break;
      }
@@ -109,6 +121,7 @@ var parse_source = function(creep, request) {
         if (err_code == ERR_FULL || err_code == ERR_NOT_ENOUGH_RESOURCES) {
             err_code = OK;
         }
+        // TODO, when not in range, you should check if the target is full on the resource and if it is then you should return OK.
     }
     return {err_code:err_code, target:target};
  };

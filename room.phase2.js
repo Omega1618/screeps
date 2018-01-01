@@ -99,7 +99,7 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleTransport, ae);
     }
     
-    if (ae < 550 && ac - ae > 0) {
+    if (ae < 550 && ac > ae) {
         return ERR_NOT_ENOUGH_ENERGY;
     }
     
@@ -107,7 +107,7 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleMiner, ae);
     }
     
-    if (ac - ae > 0) {
+    if (ac > ae) {
         return ERR_NOT_ENOUGH_ENERGY;
     }
     
@@ -161,7 +161,8 @@ var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( funct
     
     var target = Game.getObjectById(request.target);
     if (!target || target.energy == target.energyCapacity) {
-        delete Game.rooms[room_name].memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][request.target];
+        var room = Game.rooms[room_name];
+        if (room && room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST]) delete room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][request.target];
         return;
     }
     target.room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = true;
