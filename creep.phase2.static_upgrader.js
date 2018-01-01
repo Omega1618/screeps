@@ -5,7 +5,7 @@ var callback_util = require('utilities.call_back');
 
 var memory_init = function(room, creep_body) {
     var num_work = creep_body.filter(function(e) {return e == WORK}).length;
-    return {room_name:room.name, role: constants.role_enum.STATIC_UPGRADER, num_work:num_work, energy_request:null, priority:null, done_moving:false};
+    return {room_name:room.name, role: constants.role_enum.STATIC_UPGRADER, num_work:num_work, energy_request:null, priority:null, done_moving:false, ticks_to_move: 1500};
 };
 
 var startup_creep = function(creep_memory) {
@@ -45,14 +45,20 @@ var run = function(creep) {
     
     if (!creep.room.controller) return;
     
-    if (creep.memory.done_moving || creep.pos.inRangeTo(room.controller, 1)) {
-        creep.memory.done_moving = true;
+    if (creep.memory.done_moving) {
         if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
             creep.moveTo(creep.room.controller);
         }
     } else {
         var err_code = creep.moveTo(creep.room.controller);
-        creep.memory.done_moving = err_code === ERR_NO_PATH;
+        var range = creep.pos.getRangeTo(creep.room.controller);
+        if (err_code == OK) --creep.memory.ticks_to_move;
+        
+        if (range <= 3 && creep.memory.ticks_to_move > 3) creep.memory.ticks_to_move = 3;
+        if (range <= 1 || creep.memory.ticks_to_move <= 0 || err_code === ERR_NO_PATH) {
+            creep.memory.done_moving = true;
+            delete creep.memory.ticks_to_move;
+        }
     }
 };
 

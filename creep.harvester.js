@@ -86,7 +86,7 @@ var run = function(creep) {
             if(err_code == ERR_NOT_IN_RANGE) {
                 creep.moveTo(target);
             }
-            if(!err_code) {
+            if(!err_code || err_code == ERR_FULL) {
                 creep.memory.harvest_target = null;
             }
         }

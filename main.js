@@ -8,7 +8,7 @@ var stats = require('empire.stats');
 
 module.exports.loop = function () {
     
-    var tick = Game.time'
+    var tick = Game.time;
     console.log("Debug tick: " + tick);
     console.log("CPU used start: " + Game.cpu.getUsed());
     

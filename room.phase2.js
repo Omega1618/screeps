@@ -172,7 +172,7 @@ var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( funct
     new_request.source_type = request.source_type;
     new_request.target = request.target;
     new_request.type = request.type;
-    new_request.end_callback = callback_util.register_callback(cb_fn_id, {request:new_request, cb_fn_id:cb_fn_id});
+    new_request.end_callback = callback_util.register_callback(cb_fn_id, context);
     
     var is_source = false;
     var room = target.room;
