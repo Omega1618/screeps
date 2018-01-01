@@ -52,10 +52,18 @@ var end_phase = function(room) {
     delete room.memory[constants.NUM_BUILDERS];
 };
 
-var try_spawn = function(room, ae) {
+var try_spawn = function(room) {
+    var ae = room.energyAvailable;
+    var ac = room.energyCapacityAvailable;
+    
     if (room.memory[constants.NUM_HARVESTERS] < 2) {
         return util.spawn_creep(room, roleHarvester, ae);
     }
+    
+    if (ac - ae > 0) {
+        return ERR_NOT_ENOUGH_ENERGY;
+    }
+    
     var builder_factor = 0.0;
     var upgrader_factor = 1;
     if (room.controller.level >= 2) {
@@ -77,12 +85,8 @@ var try_build = function(room) {
 };
 
 // TODO this phase is very CPU inefficient.
-var run_room = function(room) {
-    var ae = room.energyAvailable;
-    var ac = room.energyCapacityAvailable;
-    if (ac - ae < 1) {
-        var err_code = try_spawn(room, ae);
-    }
+var run_room = function(room) {    
+    var err_code = try_spawn(room);
     if (Game.time % 5 == 0 && room.memory[constants.NUM_BUILDERS]) {
         // TODO cache construction site
         if(room.find(FIND_CONSTRUCTION_SITES).length == 0) {

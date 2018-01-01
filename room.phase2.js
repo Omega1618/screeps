@@ -55,6 +55,8 @@ var start_phase = function(room) {
     room.memory[constants.STATIC_BUILDER_WORKER_PARTS] = 0;
     room.memory[constants.STATIC_UPGRADER_WORKER_PARTS] = 0;
     room.memory[constants.TRANSPORT_CARRY_PARTS] = 0;
+    
+    // TODO make data structure for party
 };
 
 var end_phase = function(room) {
@@ -72,6 +74,8 @@ var end_phase = function(room) {
     delete room.memory[constants.STATIC_BUILDER_WORKER_PARTS];
     delete room.memory[constants.STATIC_UPGRADER_WORKER_PARTS];
     delete room.memory[constants.TRANSPORT_CARRY_PARTS];
+    
+    // TODO force disband all parties
 };
 
 var try_party = function (room) {
