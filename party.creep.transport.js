@@ -7,7 +7,7 @@ var roleTransport = require('creep.phase2.transport');
 var callback_util = require('utilities.call_back');
 
 var memory_init = function(room, creep_body) {
-    return {request: null, target_room_name: null, err_code: OK, finished: true, role: constants.role_enum.PARTY_TRANSPORT};
+    return {request: null, target_room_name: null, err_code: OK, spawn_pos: null, finished: true, role: constants.role_enum.PARTY_TRANSPORT};
 };
 
 var startup_creep = function(creep_memory) {
@@ -18,6 +18,13 @@ var shutdown_creep = function(creep_memory) {
 
 /** @param {Creep} creep **/
 var run = function(creep) {
+    if (creep.spawning) {
+        if (!creep.memory.spawn_pos) {
+            creep.memory.spawn_pos = creep.pos;
+        }
+        return;
+    }
+    
     var request = creep.memory.request;
     if (request) {
         var result = roleTransport.run_request(creep, request);
@@ -40,7 +47,9 @@ var run = function(creep) {
     
     var target_room_name = creep.memory.target_room_name;
     if (target_room_name && !creep.memory.finished) {
-        creep.memory.err_code = creep.travelToRoom(target_room_name);
+        var spawn_pos = creep.memory.spawn_pos;
+        spawn_pos = new RoomPosition(spawn_pos.x, spawn_pos.y, spawn_pos.roomName);
+        creep.memory.err_code = creep.travelToByRange(spawn_pos, 8);
         if (creep.memory.err_code == TRAVELTO_FINISHED){
             creep.memory.finished = true;
             creep.memory.target_room_name = null;

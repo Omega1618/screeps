@@ -18,6 +18,7 @@
  *      Should put this in stats but have it be set here.
  * TODO need to calculate the correct amount of WORKER parts on MINERS and CARRY parts on harvesters for both unreserved and reserved rooms.
  *          For now just assume things aren't reserved and use a fixed size miner and transporter.
+ * TODO calculate incoming energy and report it to the phase2 room for spawn logic.  Also calculate the correct number of carry parts in the transport.
  **/
  
 var constants = require('creep.constants');
@@ -201,7 +202,7 @@ var run = function (party_memory) {
             party_memory.miner_name = miner_name;
         }
     } else if (party_memory.transport_names.length == 0 && party_util.can_help(origin_room) && origin_room.energyAvailable >= 450) {
-        var transport_name = party_util.spawn_creep_get_name(origin_room, transportRole, 450);
+        var transport_name = party_util.spawn_creep_get_name(origin_room, transportRole, Math.min(600, origin_room.energyAvailable));
         if (transport_name) {
             party_memory.transport_names.push(transport_name);
         }

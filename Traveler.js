@@ -328,8 +328,17 @@ Creep.prototype.travelTo = function (destination) {
     return this.moveTo(destination, options);
 };
 
-Creep.prototype.travelToRoom = function (room_name) {
-    var finished = this.room.name == room_name && !this.pos.isEdge();
+Creep.prototype.travelToByRange = function (destination, range) {
+    if (this.pos.inRangeTo(destination, range)) return TRAVELTO_FINISHED;
+    return this.moveTo(destination, options);
+};
+
+// steps_in should be in the range [1, 23], controls how far into the room the creep should walk.
+Creep.prototype.travelToRoom = function (room_name, steps_in = 1) {
+    // var finished = this.room.name == room_name && !this.pos.isEdge();
+    var pos = this.pos;
+    var finished = this.room.name == room_name && pos.x <= 49 - steps_in && 
+                pos.x >= steps_in && pos.y <= 49 - steps_in && pos.y >= steps_in;
     if (finished) return TRAVELTO_FINISHED;
     return this.moveTo(new RoomPosition(25, 25, room_name), options);
 };

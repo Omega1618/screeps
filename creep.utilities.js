@@ -54,6 +54,7 @@ var run_creeps = function() {
 var all_creeps_to_recyclers = function(creeps) {
     var roleRecycler = role_id_to_module[re.RECYCLER];
     creeps.forEach(function (creep) {
+        if (!creep) return;
         var creep_name = creep.name;
         var creep_body = creep.body.forEach(function(bpart) {
             return bpart.type;

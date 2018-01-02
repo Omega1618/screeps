@@ -18,8 +18,9 @@ var shutdown_creep = function(creep_memory) {
     room.memory[constants.NUM_REPAIRER] -= 1;
 };
 
-var reset_cb_fn_id = callback_util.register_callback_fn( function(creep_id) {
-    var creep = Game.getObjectById(creep_id);
+var reset_cb_fn_id = callback_util.register_callback_fn( function(creep_name) {
+    if (!creep_name) return;
+    var creep = Game.creeps[creep_name];
     if (creep) {
         creep.memory.energy_request = null;
         creep.memory.priority = null;
@@ -32,7 +33,7 @@ var run = function(creep) {
         var request = Make_Transport_Request();
         request.target = creep.id;
         request.type = RESOURCE_ENERGY;
-        request.end_callback = callback_util.register_callback(reset_cb_fn_id, creep.id);
+        request.end_callback = callback_util.register_callback(reset_cb_fn_id, creep.name);
         
         creep.memory.energy_request = request;
         creep.memory.priority = constants.REPAIRER_PRIORITY;
@@ -43,33 +44,25 @@ var run = function(creep) {
     
     if(creep.memory.target !== null) {
         var target = Game.getObjectById(creep.memory.target);
-        if(target.hits == target.hitsMax) {
+        if(!target || target.hits == target.hitsMax) {
             creep.memory.target = null;
         }
     }
     
-    if (creep.memory.target === null) {
-        // TODO walls and roads
-        // TODO this can be optimized much better
-        creep.memory.target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-                filter: (structure) => {
-                    return structure.hits < structure.hitsMax * constants.REPAIRER_PRIORITY_REPAIR_THRESHOLD;
-                }
-        });
-        if (creep.memory.target === null) {
-            creep.memory.target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-                    filter: (structure) => {
-                        return structure.hits < structure.hitsMax * constants.REPAIRER_REPAIR_THRESHOLD;
-                    }
-            });
+    if (Game.time % 25 === 0 && creep.memory.target === null) {
+        // TODO cache a list of all structures that need to be repaired.
+        // TODO walls and STRUCTURE_RAMPART
+        var structures = creep.room.find(FIND_STRUCTURES);
+        var damaged_structures = [];
+        var min_percentage = 1.0;
+        for (var i = 0; i < structures.length; ++i) {
+            var struct = structures[i];
+            if (struct.structureType != STRUCTURE_WALL && struct.structureType != STRUCTURE_RAMPART && struct.hits < struct.hitsMax) {
+                min_percentage = Math.min(min_percentage, struct.hits / struct.hitsMax);
+                damaged_structures.push(struct);
+            }
         }
-        if (creep.memory.target === null) {
-            creep.memory.target = creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-                    filter: (structure) => {
-                        return structure.hits < structure.hitsMax;
-                    }
-            });
-        }
+        creep.memory.target = _.minBy(damaged_structures, function(struct) {return struct.hits / struct.hitsMax});
         
         if(creep.memory.target !== null) {
             creep.memory.target = creep.memory.target.id;
@@ -78,7 +71,7 @@ var run = function(creep) {
     
     if (creep.memory.target !== null) {
         var target = Game.getObjectById(creep.memory.target);
-        if(creep.repair(creep.memory.target) == ERR_NOT_IN_RANGE) {
+        if(target && creep.repair(creep.memory.target) == ERR_NOT_IN_RANGE) {
             creep.moveTo(creep.memory.target);
         }
     } else {
