@@ -38,16 +38,12 @@ var run = function(creep) {
         return;
     }
     
+    // TODO change behavior so the transport walks in to the room for a few steps.  Preferably toward a spawn.
     var target_room_name = creep.memory.target_room_name;
     if (target_room_name) {
-        if(target_room_name != creep.room.name) {
-            creep.memory.err_code = creep.travelTo(new RoomPos(25, 25, target_room_name));
-        } else {
-            if (!creep.memory.finished) {
-                creep.memory.finished = true;
-                creep.memory.err_code = creep.travelTo(new RoomPos(25, 25, target_room_name));
-            }
-            creep.memory.err_code = OK;
+        creep.memory.err_code = creep.travelTo(new RoomPosition(25, 25, target_room_name));
+        if(target_room_name == creep.room.name && creep.memory.err_code == OK) {
+            creep.memory.finished = true;
             creep.memory.target_room_name = null;
         }
     }
@@ -73,6 +69,7 @@ var move_to_room = function(creep, room_name) {
         if (!creep.memory.finished) {
             return ERR_BUSY;
         }
+        creep.memory.finished = false;
         creep.memory.target_room_name = room_name;
         return OK;
     }

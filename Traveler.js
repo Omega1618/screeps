@@ -6,6 +6,7 @@
  * https://gist.github.com/bonzaiferroni/bbbbf8a681f071dc13759da8a1be316e
  *
  */
+ /**
 "use strict";
 const REPORT_CPU_THRESHOLD = 50;
 const DEFAULT_MAXOPS = 20000;
@@ -304,6 +305,7 @@ class Traveler {
     }
 }
 exports.Traveler = Traveler;
+**/
 
 // uncomment this to have an instance of traveler available through import
 // exports.traveler = new Traveler();
@@ -312,9 +314,14 @@ exports.Traveler = Traveler;
 // global.traveler = new Traveler();
 
 // uncomment this block to assign a function to Creep.prototype: creep.travelTo(destination)
-//*
+/*
 const traveler = new Traveler();
 Creep.prototype.travelTo = function (destination, options) {
     return traveler.travelTo(this, destination, options);
 };
 //**/
+
+Creep.prototype.travelTo = function (destination) {
+    var options = {reusePath: 15, ignoreCreeps: true};
+    return this.moveTo(destination, options);
+};

@@ -8,6 +8,8 @@
  * Then have each do the appropriate thing
  * The transporter should carry back energy to the home room, drop it, then create a request to pick it up.
  *
+ * Can probably do this with 1 miner, 1 transport, and 1 builder.  You first need to claim the room with a claimer, but the claimer can be immediately recycled.
+ *
  **/
 
 module.exports = {

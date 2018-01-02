@@ -80,8 +80,8 @@ var become_recycler = function(creep, shutdown_fn) {
         return bpart.type;
     });
     shutdown_fn(Memory.creeps[creep_name]);
-    Memory.creeps[creep_name] = roleRecycler.memory_init(creep.room, creep_body);
-    roleRecycler.startup_creep(Memory.creeps[creep_name]);
+    Memory.creeps[creep_name] = memory_init(creep.room, creep_body);
+    startup_creep(Memory.creeps[creep_name]);
 };
 
 var id_to_recycler = function(id, shutdown_fn) {

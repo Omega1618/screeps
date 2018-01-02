@@ -17,7 +17,7 @@ var shutdown_creep = function(creep_memory) {
 var run = function(creep) {
     var current_room = creep.room;
     if (current_room.name != creep.memory.target_room_name) {
-        creep.travelTo(new RoomPos(25, 25, creep.memory.target_room_name));
+        creep.travelTo(new RoomPosition(25, 25, creep.memory.target_room_name));
         return;
     }
     

@@ -14,7 +14,7 @@ var creep_util = require('creep.utilities');
 var constants = require('creep.constants');
 
  var memory_init = function (room_of_origin) {
-    var towers = room_of_origin.find(FIND_MY_STRUCTURES, {filter {structureType: STRUCTURE_TOWER}});
+    var towers = room_of_origin.find(FIND_MY_STRUCTURES, {filter: {structureType: STRUCTURE_TOWER}});
     for (var i = 0; i < towers.length; ++i) {
         towers[i] = towers[i].id;
     }

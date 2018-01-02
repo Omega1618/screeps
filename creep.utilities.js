@@ -12,6 +12,11 @@ role_id_to_module[re.STATIC_BUILDER] = require('creep.phase2.static_builder');
 role_id_to_module[re.TRANSPORT] = require('creep.phase2.transport');
 role_id_to_module[re.STATIC_UPGRADER] = require('creep.phase2.static_upgrader');
 role_id_to_module[re.REPAIRER] = require('creep.phase2.repairer');
+// party creeps
+role_id_to_module[re.PARTY_SCOUT] = require('party.creep.scout');
+role_id_to_module[re.PARTY_TRANSPORT] = require('party.creep.transport');
+// party long distance mine creeps
+role_id_to_module[re.PARTY_LONG_DISTANCE_MINE_MINER] = require('party.long_distance_mine.creep.miner');
 // party defend creeps
 role_id_to_module[re.PARTY_DEFEND_MELEE_DEFENDER] = require('party.defend.creep.melee_defender');
 

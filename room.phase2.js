@@ -24,6 +24,8 @@ var constants = require('creep.constants');
 var util = require("room.utilities");
 var room_layout = require('room.layout');
 
+var party_manager = require('party.manager');
+
 var start_phase = function(room) {
     // data structure to keep track of miners at each source.
     var has_drop_miner = {};
@@ -56,7 +58,11 @@ var start_phase = function(room) {
     room.memory[constants.STATIC_UPGRADER_WORKER_PARTS] = 0;
     room.memory[constants.TRANSPORT_CARRY_PARTS] = 0;
     
-    // TODO make data structure for party
+    var party_data = {};
+    for (let party_module_name in constants.party_enum) {
+        party_data[constants.party_enum[party_module_name]] = [];
+    }
+    room.memory[constants.ROOM_PARTIES] = party_data;
 };
 
 var end_phase = function(room) {
@@ -75,12 +81,44 @@ var end_phase = function(room) {
     delete room.memory[constants.STATIC_UPGRADER_WORKER_PARTS];
     delete room.memory[constants.TRANSPORT_CARRY_PARTS];
     
-    // TODO force disband all parties
+    // force disband all parties
+    var party_data = room.memory[constants.ROOM_PARTIES];
+    for (let party_module_name in party_data) {
+        var party_list = party_data[party_module_name];
+        for (var i = 0; i < party_list.length; ++i) {
+            party_manager.disband_party(party_list[i]);
+        }
+    }
+    delete room.memory[constants.ROOM_PARTIES];
 };
 
 var try_party = function (room) {
+    // console.log("Try create party");
+    var pe = constants.party_enum;
+    var party_data = room.memory[constants.ROOM_PARTIES];
+    
+    // Remove dead parties
+    for (let party_module_name in pe) {
+        party_data[pe[party_module_name]] = _.filter(party_data[pe[party_module_name]], function(party_id){
+            return party_manager.is_active(party_id);
+        });      
+    }
+    
+    // TODO better logic for deciding the number of remote mines
+    if (party_data[pe.LONG_DISTANCE_MINE].length < 2) {
+        var party_id = party_manager.create_party(room, pe.LONG_DISTANCE_MINE);
+        if (party_id) {
+            // console.log("Created long distance miner party");
+            party_data[pe.LONG_DISTANCE_MINE].push(party_id);
+            return OK;
+        } else {
+            return ERR_NOT_ENOUGH_RESOURCES;
+        }
+    }
+    
     // TODO, make sure you have enough CPU in the bucket
     // TODO, parties should use resources from the storage and should only be created if enough resources are available in the storage.
+    return ERR_FULL;
 }
 
 var try_spawn = function(room) {
@@ -145,7 +183,6 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleUpgrader, ae);
     }
     
-    try_party(room);
     return ERR_FULL;
 };
 
@@ -212,6 +249,9 @@ var run_room = function(room) {
     var err_code = try_spawn(room);
     if (err_code == OK || Game.time % 10 == 0) {
         make_structure_energy_requests(room);
+    }
+    if (err_code == ERR_FULL) {
+        try_party(room);
     }
     if (Game.time % 50 == 0 && room.controller.level >= 3) {
         // TODO, this may create a construction site.  Need to coordinate between building economic structures and building defense structures.

@@ -22,13 +22,12 @@ var run = function(creep) {
         return;
     }
     if(target_room_name != creep.room.name) {
-        creep.memory.err_code = creep.travelTo(new RoomPos(25, 25, target_room_name));
+        creep.memory.err_code = creep.travelTo(new RoomPosition(25, 25, target_room_name));
     } else {
         if (!creep.memory.finished) {
-            creep.memory.finished = true;
-            creep.memory.err_code = creep.travelTo(new RoomPos(25, 25, target_room_name));
+            creep.memory.err_code = creep.travelTo(new RoomPosition(25, 25, target_room_name));
+            if (creep.memory.err_code == OK) creep.memory.finished = true;
         }
-        creep.memory.err_code = OK;
     }
     
     var last_tick = stats_module.get_room_stat(creep.room.name, stats_module.room_stat_names.LAST_UPDATE_TICK);
