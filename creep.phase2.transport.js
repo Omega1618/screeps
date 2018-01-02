@@ -163,7 +163,7 @@ var suggested_body = function(energy) {
         return null;
     }
     var body = [MOVE, CARRY];
-    energy = Math.min(600, energy) - 100;
+    energy = Math.min(900, energy) - 100;
     
     if (energy >= 50) {
         body.push(CARRY);

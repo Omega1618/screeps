@@ -7,7 +7,7 @@ var empire_stat_names = {
 // TODO, consider adding a check for if the room had hostile creeps upon arrival, and record the owner(s).
 var room_stat_names = {
     LAST_UPDATE_TICK:0,
-    SOURCE_LOCATIONS:1, // Returns a list of objects that have {x: ..., y: ..., id: source's id}
+    SOURCE_LOCATIONS:1, // Returns a list of objects that have {x: ..., y: ..., id: source's id} -- the long distance mining party may add a flag for remote mining
     HOSTILE:2, // returns the room controller level if it is hostile and otherwise undefined (this means rooms that are known to not be hostile are also marked as undefined)
     CONTAINS_SOURCE_KEEPER:3
 };

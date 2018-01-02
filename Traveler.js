@@ -321,7 +321,24 @@ Creep.prototype.travelTo = function (destination, options) {
 };
 //**/
 
+var options = {reusePath: 25, ignoreCreeps: false};
+global.TRAVELTO_FINISHED = 1;
+
 Creep.prototype.travelTo = function (destination) {
-    var options = {reusePath: 15, ignoreCreeps: true};
     return this.moveTo(destination, options);
+};
+
+Creep.prototype.travelToRoom = function (room_name) {
+    var finished = this.room.name == room_name && !this.pos.isEdge();
+    if (finished) return TRAVELTO_FINISHED;
+    return this.moveTo(new RoomPosition(25, 25, room_name), options);
+};
+
+Creep.prototype.travelToCachedPath = function () {
+    if (this.memory._move && this.memory._move.time && this.memory._move.dest && Game.time <= this.memory._move.time + options.reusePath) {
+        var dest = this.memory._move.dest;
+        return this.moveTo(new RoomPosition(dest.x, dest.y, dest.room), options);
+    } else {
+        return ERR_NOT_FOUND;
+    }  
 };

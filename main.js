@@ -1,6 +1,7 @@
 // prototypes
 require('room.prototype');
 require("Traveler");
+require('extend_lodash');
 
 var creep_utilities = require('creep.utilities');
 var party_manager = require('party.manager');
