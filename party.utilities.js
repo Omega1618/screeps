@@ -1,5 +1,5 @@
 var scoutRole = require('party.creep.scout');
-var room_manager = require('room.mamanger');
+var room_manager = null;
 var room_utilities = require('room.utilities');
 
 var get_creep_by_id = function(creep_id) {
@@ -33,15 +33,25 @@ var scout_room = function (scout_name, target_room_name, origin_room) {
         scoutRole.set_new_target(scout, target_room_name);
         return undefined;
     }
+    if (room_manager == null) {
+        room_manager = require('room.manager'); // Lazy require to resolve circular dependency.  TODO fix the circular dependency.
+    }
     if (room_manager.can_help(origin_room)) {
         return spawn_creep_get_name(origin_room, scoutRole, 50);
     }
     return undefined;
 };
 
+var can_help = function(room) {
+    if (room_manager == null) {
+        room_manager = require('room.manager'); // Lazy require to resolve circular dependency.  TODO fix the circular dependency.
+    }
+    return room_manager.can_help(room);
+};
+
 module.exports = {
     get_creep_by_id: get_creep_by_id,
     spawn_creep_get_name: spawn_creep_get_name,
-    can_help: room_manager.can_help,
+    can_help: can_help,
     scout_room: scout_room
 };

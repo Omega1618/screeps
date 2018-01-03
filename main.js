@@ -1,8 +1,10 @@
 // prototypes
 require('room.prototype');
+require("Traveler");
+require('extend_lodash');
 
 var creep_utilities = require('creep.utilities');
-// var party_manager = require('party.manager');
+var party_manager = require('party.manager');
 var room_manager = require('room.manager');
 var stats = require('empire.stats');
 
@@ -12,7 +14,7 @@ module.exports.loop = function () {
     console.log("Debug tick: " + tick);
     console.log("CPU used start: " + Game.cpu.getUsed());
     
-    // party_manager.run_parties();
+    party_manager.run_parties();
     creep_utilities.run_creeps();
     room_manager.run_rooms();
     

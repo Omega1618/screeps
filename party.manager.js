@@ -17,13 +17,13 @@ party_module_id_to_module[pe.ATTACK] =  require('party.attack');
 party_module_id_to_module[pe.CLAIM] = require('party.claim');
 party_module_id_to_module[pe.LONG_DISTANCE_MINE] = require('party.long_distance_mine');
 party_module_id_to_module[pe.TRANSPORT] = require('party.transport');
-party_module_id_to_module[pe.MINE_POWER] = require('party.MINE_POWER');
+party_module_id_to_module[pe.MINE_POWER] = require('party.mine_power');
 
 var get_module_from_id = function(party_id) {
     var party_memory = Memory.parties[party_id];
     for (var module_id in party_module_id_to_module) {
         if(party_memory.module_id == module_id) {
-            return party_module_id_to_module[party_id];
+            return party_module_id_to_module[module_id];
         }
     } 
     return null;
@@ -54,7 +54,7 @@ var run_parties = function() {
         var party_memory = Memory.parties[party_id];
         var module = get_module_from_id(party_id);
         
-    	if (module.should_disband(party_memory)){
+    	if (module.should_disband(party_memory)) {
     		cleanup_party(party_id);
     	} else {
             run_party(party_id);
@@ -68,7 +68,7 @@ var create_party = function(room, party_module_id) {
         return null;
     }
     // TODO Potential overflow error
-    var party_id = Memory.party_counter | 0;
+    var party_id = Memory.party_counter | 1;
     var party_memory = module.memory_init(room);
     if (!party_memory) {
         return null;
@@ -80,10 +80,15 @@ var create_party = function(room, party_module_id) {
     return party_id;
 };
 
+var is_active = function(party_id) {
+    return Boolean(Memory.parties[party_id]);
+}
+
 module.exports = {
     run_parties: run_parties,
     create_party: create_party,
     disband_party: disband_party,
+    is_active: is_active,
     
     run_party: run_party,
     cleanup_party: cleanup_party

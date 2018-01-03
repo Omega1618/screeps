@@ -38,7 +38,7 @@ var get_phase_module = function (room) {
 };
 
 var run_room = function(room) {
-    if(!room.controller.my) {
+    if(!room.controller || !room.controller.my) {
         return;
     }
     check_switch_phase(room);
@@ -47,11 +47,12 @@ var run_room = function(room) {
 };
 
 var can_help = function(room) {
-    if(!room.controller.my) {
+    if(!room.controller || !room.controller.my) {
         return false;
     }
     var phase_module = get_phase_module(room);
-    if (phase_module) phase_module.can_help(room);
+    if (phase_module) return phase_module.can_help(room);
+    return false;
 };
 
 // For manual use only, may result in bad things

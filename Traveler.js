@@ -6,6 +6,7 @@
  * https://gist.github.com/bonzaiferroni/bbbbf8a681f071dc13759da8a1be316e
  *
  */
+ /**
 "use strict";
 const REPORT_CPU_THRESHOLD = 50;
 const DEFAULT_MAXOPS = 20000;
@@ -304,6 +305,7 @@ class Traveler {
     }
 }
 exports.Traveler = Traveler;
+**/
 
 // uncomment this to have an instance of traveler available through import
 // exports.traveler = new Traveler();
@@ -312,9 +314,40 @@ exports.Traveler = Traveler;
 // global.traveler = new Traveler();
 
 // uncomment this block to assign a function to Creep.prototype: creep.travelTo(destination)
-//*
+/*
 const traveler = new Traveler();
 Creep.prototype.travelTo = function (destination, options) {
     return traveler.travelTo(this, destination, options);
 };
 //**/
+
+var options = {reusePath: 25, ignoreCreeps: false};
+global.TRAVELTO_FINISHED = 1;
+
+Creep.prototype.travelTo = function (destination) {
+    return this.moveTo(destination, options);
+};
+
+Creep.prototype.travelToByRange = function (destination, range) {
+    if (this.pos.inRangeTo(destination, range)) return TRAVELTO_FINISHED;
+    return this.moveTo(destination, options);
+};
+
+// steps_in should be in the range [1, 23], controls how far into the room the creep should walk.
+Creep.prototype.travelToRoom = function (room_name, steps_in = 1) {
+    // var finished = this.room.name == room_name && !this.pos.isEdge();
+    var pos = this.pos;
+    var finished = this.room.name == room_name && pos.x <= 49 - steps_in && 
+                pos.x >= steps_in && pos.y <= 49 - steps_in && pos.y >= steps_in;
+    if (finished) return TRAVELTO_FINISHED;
+    return this.moveTo(new RoomPosition(25, 25, room_name), options);
+};
+
+Creep.prototype.travelToCachedPath = function () {
+    if (this.memory._move && this.memory._move.time && this.memory._move.dest && Game.time <= this.memory._move.time + options.reusePath) {
+        var dest = this.memory._move.dest;
+        return this.moveTo(new RoomPosition(dest.x, dest.y, dest.room), options);
+    } else {
+        return ERR_NOT_FOUND;
+    }  
+};

@@ -7,7 +7,7 @@ var empire_stat_names = {
 // TODO, consider adding a check for if the room had hostile creeps upon arrival, and record the owner(s).
 var room_stat_names = {
     LAST_UPDATE_TICK:0,
-    SOURCE_LOCATIONS:1, // Returns a list of objects that have {x: ..., y: ..., id: source's id}
+    SOURCE_LOCATIONS:1, // Returns a list of objects that have {x: ..., y: ..., id: source's id} -- the long distance mining party may add a flag for remote mining
     HOSTILE:2, // returns the room controller level if it is hostile and otherwise undefined (this means rooms that are known to not be hostile are also marked as undefined)
     CONTAINS_SOURCE_KEEPER:3
 };
@@ -58,7 +58,7 @@ var populate_room_stats = function (room_name) {
     }
     var stats = Memory.stats.rooms[room_name];
     
-    stats[room_stat_names.LAST_UPDATE_TICK] = Game.tick;
+    stats[room_stat_names.LAST_UPDATE_TICK] = Game.time;
     update_hostile_room_stat(room_name);
     stats[room_stat_names.SOURCE_LOCATIONS] = _.map(room.find(FIND_SOURCES), function (source) { return {x:source.pos.x, y:source.pos.y, id:source.id}} );
     stats[room_stat_names.CONTAINS_SOURCE_KEEPER] = room.find(FIND_HOSTILE_STRUCTURES, {filter: {structureType: STRUCTURE_KEEPER_LAIR}}).length > 0;    
@@ -77,11 +77,11 @@ var get_room_stat = function (room_name, stat_id) {
         return undefined;
     }
     stats = stats.rooms;
-    if (stats) {
+    if (!stats) {
         return undefined;
     }
     stats = stats[room_name];
-    if (stats) {
+    if (!stats) {
         return undefined;
     }
     return stats[stat_id];
