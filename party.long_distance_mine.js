@@ -19,6 +19,7 @@
  * TODO need to calculate the correct amount of WORKER parts on MINERS and CARRY parts on harvesters for both unreserved and reserved rooms.
  *          For now just assume things aren't reserved and use a fixed size miner and transporter.
  * TODO calculate incoming energy and report it to the phase2 room for spawn logic.  Also calculate the correct number of carry parts in the transport.
+ * TODO use throughput in transport creep.
  **/
  
 var constants = require('creep.constants');
@@ -233,7 +234,20 @@ var run = function (party_memory) {
     party_memory.transport_names = new_tansport_names;
     
    // TODO
-   // disband when drop miner dies
+   // disband if miner takes damage and alert the room of origin that you're under attack (differential npc invaders vs other players)
+   var attacked = false;
+   if (miner && miner.hits < miner.hitsMax) attacked = true;
+   for (var i = 0; i < old_transport_names.length; ++i) {
+       var transport = old_transport_names[i];
+       if (transport) {
+           transport = Game.creeps[transport];
+       }
+       if (transport && transport.hits < transport.hitsMax) attacked = true;
+   }
+   if (attacked) {
+       party_memory.finished = true;
+       // TODO alert the room of origin
+   }
 };
 
 var should_disband =  function (party_memory) {
@@ -252,7 +266,10 @@ var force_disband = function (party_memory) {
         if (room_sources) {
             for (var i = 0; i < room_sources.length; ++i) {
                 var stats_obj = room_sources[i];
-                if (stats_obj.id == source_object.id && stats_obj[HAS_REMOTE_MINING]) delete stats_obj[HAS_REMOTE_MINING];
+                if (stats_obj.id == source_object.id && stats_obj[HAS_REMOTE_MINING]) {
+                    delete stats_obj[HAS_REMOTE_MINING];
+                    break;
+                } 
             }
         }
     }
@@ -263,8 +280,19 @@ var force_disband = function (party_memory) {
         recyclerRole.name_to_recycler(party_memory.transport_names[i], transportRole.shutdown_creep);
     }
  };
+ 
+var get_throughput = function (party_memory) {
+    var throughput = 0;
+    for (var i = 0; i < party_memory.transport_names.length; ++i) {
+        var creep = Game.creeps[party_memory.transport_names[i]];
+        if (creep) throughput += transportRole.get_throughput(creep);
+    }
+    return throughput;
+};
 
 module.exports = {
+  get_throughput: get_throughput,
+    
   memory_init: memory_init,
   startup: startup,
   run: run,

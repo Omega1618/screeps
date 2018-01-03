@@ -101,17 +101,21 @@ var towers_attack = function(party_memory, target) {
     for (var i = 0; i < party_memory.tower_ids.length; ++i) {
         var tower = Game.getObjectById(party_memory.tower_ids[i]);
         if (tower) {
-            // TODO
+            tower.attack(target);
         }
     }
 }
 
 var run =  function (party_memory) {
     if (Game.time % 5 == 0) scan_threats(party_memory);
-    if (party_memory.offense_parts > 0) {
+    if (party_memory.offense_parts > 0 || party_memory.healing_parts > 0) {
+        var tower = Game.getObjectById(party_memory.tower_ids[0]); // TODO remove the non-existent towers before this loop.
         // TODO find closest target and attack, later implement more advanced behavior.
+    } else {
+        party_memory.finished = true;
     }
    //TODO
+   //TODO use safemodes
    //TODO, before disbanding you should send a scout to see if enemies are in the room they came from.
 };
 

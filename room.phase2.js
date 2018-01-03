@@ -25,6 +25,7 @@ var util = require("room.utilities");
 var room_layout = require('room.layout');
 
 var party_manager = require('party.manager');
+var party_long_distance_mining = require('party.long_distance_mine');
 
 var start_phase = function(room) {
     // data structure to keep track of miners at each source.
@@ -149,7 +150,12 @@ var try_spawn = function(room) {
         return ERR_NOT_ENOUGH_ENERGY;
     }
     
-    var incoming_energy = room.memory[constants.NUM_SAFE_SOURCES] * 10; // TODO update this with source keeper sources and long distance mining.
+    var incoming_energy = room.memory[constants.NUM_SAFE_SOURCES] * 10; // TODO update this with source keeper sources.
+    var mining_parties = room.memory[constants.ROOM_PARTIES][constants.party_enum.LONG_DISTANCE_MINE];
+    for (var i = 0; i < mining_parties.length; ++i) {
+        incoming_energy += party_long_distance_mining.get_throughput(mining_parties[i]);
+    }
+    
     var builder_outgoing_energy = room.memory[constants.STATIC_BUILDER_WORKER_PARTS] * BUILD_POWER;
     var upgrader_outgoing_energy = room.memory[constants.STATIC_UPGRADER_WORKER_PARTS] * UPGRADE_CONTROLLER_POWER;
     

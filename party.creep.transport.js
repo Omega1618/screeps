@@ -7,7 +7,22 @@ var roleTransport = require('creep.phase2.transport');
 var callback_util = require('utilities.call_back');
 
 var memory_init = function(room, creep_body) {
-    return {request: null, target_room_name: null, err_code: OK, spawn_pos: null, finished: true, role: constants.role_enum.PARTY_TRANSPORT};
+    var throughput = {
+        deposited: 0,
+        throughput: 0,
+        prev_check_carry: 0,
+    };
+    return {request: null, target_room_name: null, err_code: OK, spawn_pos: null, throughput:throughput, finished: true, role: constants.role_enum.PARTY_TRANSPORT};
+};
+
+var update_throughput = function(creep) {
+    var throughput = creep.memory.throughput;
+    var current_carry = _.sum(creep.carry);
+    if (current_carry < throughput.prev_check_carry) {
+        throughput.deposited += throughput.prev_check_carry - current_carry;
+        throughput.throughput = throughput.deposited / (CREEP_LIFE_TIME - creep.ticksToLive);
+    }
+    throughput.prev_check_carry = current_carry;
 };
 
 var startup_creep = function(creep_memory) {
@@ -56,6 +71,10 @@ var run = function(creep) {
         } 
     }
 
+    if (Game.time % 5 == 0) {
+        // A bit risky to only update this every 5 ticks, but probably fine.
+        update_throughput(creep);
+    }
 };
 
 var suggested_body = function(energy) {
@@ -97,6 +116,10 @@ var add_request = function(creep, request) {
     return ERR_INVALID_ARGS;
 };
 
+var get_throughput = function(creep) {
+    return creep.memory.throughput.throughput;
+};
+
 module.exports = {memory_init:memory_init, run:run, startup_creep:startup_creep, shutdown_creep:shutdown_creep,
-                  suggested_body: suggested_body, move_to_room: move_to_room, add_request: add_request
+                  suggested_body: suggested_body, move_to_room: move_to_room, add_request: add_request, get_throughput: get_throughput
 };
