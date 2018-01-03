@@ -39,6 +39,11 @@ var run = function(creep) {
         }
         return;
     }
+
+    if (Game.time % 5 == 0) {
+        // A bit risky to only update this every 5 ticks, but probably fine.
+        update_throughput(creep);
+    }
     
     var request = creep.memory.request;
     if (request) {
@@ -69,11 +74,6 @@ var run = function(creep) {
             creep.memory.finished = true;
             creep.memory.target_room_name = null;
         } 
-    }
-
-    if (Game.time % 5 == 0) {
-        // A bit risky to only update this every 5 ticks, but probably fine.
-        update_throughput(creep);
     }
 };
 

@@ -153,7 +153,8 @@ var try_spawn = function(room) {
     var incoming_energy = room.memory[constants.NUM_SAFE_SOURCES] * 10; // TODO update this with source keeper sources.
     var mining_parties = room.memory[constants.ROOM_PARTIES][constants.party_enum.LONG_DISTANCE_MINE];
     for (var i = 0; i < mining_parties.length; ++i) {
-        incoming_energy += party_long_distance_mining.get_throughput(mining_parties[i]);
+        var party_memory = Memory.parties[mining_parties[i]];
+        if (party_memory) incoming_energy += party_long_distance_mining.get_throughput(party_memory);
     }
     
     var builder_outgoing_energy = room.memory[constants.STATIC_BUILDER_WORKER_PARTS] * BUILD_POWER;
