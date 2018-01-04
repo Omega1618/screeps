@@ -106,7 +106,7 @@ var try_party = function (room) {
     }
     
     // TODO better logic for deciding the number of remote mines
-    if (party_data[pe.LONG_DISTANCE_MINE].length < 2) {
+    if (party_data[pe.LONG_DISTANCE_MINE].length < 1 || (party_data[pe.LONG_DISTANCE_MINE].length < 2 && room.controller.level >= 3)) {
         var party_id = party_manager.create_party(room, pe.LONG_DISTANCE_MINE);
         if (party_id) {
             // console.log("Created long distance miner party");

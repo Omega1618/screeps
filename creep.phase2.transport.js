@@ -3,6 +3,8 @@ var room_utils = require('room.utilities');
 var callback_util = require('utilities.call_back');
 var recyclerRole = require('creep.recycler');
 
+var movement_options = {reusePath: 10, ignoreCreeps: false};
+
 var memory_init = function(room, creep_body) {
     var num_carry = creep_body.filter(function(e) {return e == CARRY}).length;
     return {request:null, find_source:true, num_carry:num_carry, role: constants.role_enum.TRANSPORT, room_name:room.name};
@@ -146,7 +148,7 @@ var run = function(creep) {
     
     // console.log("Error code: " + err_code);
     if(err_code == ERR_NOT_IN_RANGE) {
-        creep.moveTo(target);
+        creep.moveTo(target, movement_options);
     } else if (err_code == OK || err_code == ERR_INVALID_TARGET || err_code == ERR_NOT_OWNER || err_code == ERR_NO_BODYPART
                 || err_code == ERR_NOT_ENOUGH_ENERGY || err_code == ERR_NOT_ENOUGH_RESOURCES) {
         // console.log("Completed request");

@@ -62,17 +62,23 @@ var run = function(creep) {
                 damaged_structures.push(struct);
             }
         }
-        creep.memory.target = _.minBy(damaged_structures, function(struct) {return struct.hits / struct.hitsMax});
         
-        if(creep.memory.target !== null) {
-            creep.memory.target = creep.memory.target.id;
+        if (min_percentage <= 0.85) {
+            var target = _.minBy(damaged_structures, function(struct) {return struct.hits / struct.hitsMax});
+            if(target !== null) {
+                creep.memory.target = target.id;
+            }
         }
     }
     
     if (creep.memory.target !== null) {
         var target = Game.getObjectById(creep.memory.target);
-        if(target && creep.repair(creep.memory.target) == ERR_NOT_IN_RANGE) {
-            creep.moveTo(creep.memory.target);
+        if (target) {
+            if(creep.repair(target) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(target);
+            }
+        } else {
+            creep.memory.target = null;
         }
     } else {
         if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
