@@ -30,7 +30,7 @@ var static_builder_reset_cb_fn_id = callback_util.register_callback_fn( function
 
 /** @param {Creep} creep **/
 var run = function(creep) {
-    if(creep.memory.energy_request === null && creep.carry.energy < constants.STATIC_BUILDER_REQUEST_ENERGY) {
+    if(creep.memory.energy_request === null && creep.carry.energy < constants.STATIC_BUILDER_REQUEST_ENERGY && creep.carry.energy < creep.carryCapacity) {
         var request = Make_Transport_Request();
         request.target = creep.id;
         request.type = RESOURCE_ENERGY;
@@ -68,25 +68,25 @@ var suggested_body = function(energy) {
     energy -= 150;
     
     var num_worker_parts = (energy - (energy % 100)) / 100;
-    num_worker_parts = Math.min(num_worker_parts, 4);
+    num_worker_parts = Math.min(num_worker_parts, 2);
     for(var i = 0; i < num_worker_parts; ++i) {
         body.push(WORK);
     }
     energy -= 100 * num_worker_parts;
     
-    for (var i = 0; i < 2; i++) {
+    for (var i = 0; i < 4; i++) {
         if (energy >= 50) {
             body.push(CARRY);
             energy -= 50;
         }
     }
     
-    for(var i = 0; i < 1 && energy >= 300; ++i) {
+    for(var i = 0; i < 2 && energy >= 250; ++i) {
         body.push(MOVE);
         body.push(CARRY);
+        body.push(CARRY);
         body.push(WORK);
-        body.push(WORK);
-        energy -= 300;
+        energy -= 250;
     }
     
     return body;

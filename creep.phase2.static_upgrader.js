@@ -30,7 +30,7 @@ var static_upgrader_reset_cb_fn_id = callback_util.register_callback_fn( functio
 
 /** @param {Creep} creep **/
 var run = function(creep) {
-    if(creep.memory.energy_request === null && creep.carry.energy < constants.STATIC_UPGRADER_REQUEST_ENERGY) {
+    if(creep.memory.energy_request === null && creep.carry.energy < constants.STATIC_UPGRADER_REQUEST_ENERGY && creep.carry.energy < creep.carryCapacity) {
         var request = Make_Transport_Request();
         request.target = creep.id;
         request.type = RESOURCE_ENERGY;
@@ -54,7 +54,10 @@ var run = function(creep) {
         var range = creep.pos.getRangeTo(creep.room.controller);
         if (err_code == OK) --creep.memory.ticks_to_move;
         
-        if (range <= 3 && creep.memory.ticks_to_move > 3) creep.memory.ticks_to_move = 3;
+        if (range <= 3) {
+            creep.upgradeController(creep.room.controller);
+            if (creep.memory.ticks_to_move > 5) creep.memory.ticks_to_move = 5;
+        }
         if (range <= 1 || creep.memory.ticks_to_move <= 0 || err_code === ERR_NO_PATH) {
             creep.memory.done_moving = true;
             delete creep.memory.ticks_to_move;

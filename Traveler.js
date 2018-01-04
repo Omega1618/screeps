@@ -344,7 +344,9 @@ Creep.prototype.travelToRoom = function (room_name, steps_in = 1) {
 };
 
 Creep.prototype.travelToCachedPath = function () {
-    if (this.memory._move && this.memory._move.time && this.memory._move.dest && Game.time <= this.memory._move.time + options.reusePath) {
+    var new_options = Object.assign({}, options);
+    new_options.noPathFinding = true;
+    if (this.memory._move && this.memory._move.dest) {
         var dest = this.memory._move.dest;
         return this.moveTo(new RoomPosition(dest.x, dest.y, dest.room), options);
     } else {

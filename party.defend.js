@@ -100,22 +100,43 @@ var startup =  function (party_memory) {
 var towers_attack = function(party_memory, target) {
     for (var i = 0; i < party_memory.tower_ids.length; ++i) {
         var tower = Game.getObjectById(party_memory.tower_ids[i]);
+        tower.attack(target);
+    }
+};
+
+var remove_dead_towers = function(party_memory) {
+    var new_towers_list = [];
+    for (var i = 0; i < party_memory.tower_ids.length; ++i) {
+        var tower = Game.getObjectById(party_memory.tower_ids[i]);
         if (tower) {
-            tower.attack(target);
+            new_towers_list.push(party_memory.tower_ids[i]);
         }
     }
-}
+};
 
 var run =  function (party_memory) {
     if (Game.time % 5 == 0) scan_threats(party_memory);
+    
+    // find closest target and attack
+    // TODO later implement more advanced behavior.
+    remove_dead_towers(party_memory);
     if (party_memory.offense_parts > 0 || party_memory.healing_parts > 0) {
-        var tower = Game.getObjectById(party_memory.tower_ids[0]); // TODO remove the non-existent towers before this loop.
-        // TODO find closest target and attack, later implement more advanced behavior.
+        var tower = Game.getObjectById(party_memory.tower_ids[0]);
+        var enemy_creeps = _.map(Object.keys(party_memory.enemy_creeps), function(creep_id) {return Game.getObjectById(creep_id);});
+        var target = _.minBy(enemy_creeps, function (creep) {
+            if (creep) {
+                if (tower.room.name == creep.room.name) return tower.pos.getRangeTo(creep);
+                return Infinity;
+            } else {
+                return Infinity;
+            }
+        });
+        towers_attack(party_memory, target);
     } else {
         party_memory.finished = true;
     }
-   //TODO
-   //TODO use safemodes
+   //TODO spawning creeps defensively.
+   //TODO use safemodes, don't use on invaders
    //TODO, before disbanding you should send a scout to see if enemies are in the room they came from.
 };
 
