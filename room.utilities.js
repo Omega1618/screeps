@@ -1,6 +1,6 @@
 var constants = require('creep.constants');
 var MultiQueue = require('utilities.queue');
-// var callback_util = require('utilities.call_back');
+var callback_util = require('utilities.call_back');
 
 var spawn_creep_with_name = function(room, creep_module, energy) {
     var spawners = room.find(FIND_MY_STRUCTURES, {
@@ -54,6 +54,39 @@ var check_and_init_transport_queues = function(room) {
     room.memory[constants.TRANSPORT_REQUEST_TRACKER_NEXT_ID] = 1;
 }
 
+var transport_request_mark_ignore = function(room, request) {
+    room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id] = true;
+};
+
+var transport_request_should_ignore = function(room, request) {
+    if (request.id === null) {
+        return false;
+    }
+    return room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
+};
+
+var clear_impl = function(room, queue) {
+    var new_queue = MultiQueue.make();
+    while (true) {
+        var result = MultiQueue.dequeue_with_priority(queue);
+        if (!result) return new_queue;
+        var request = result.item;
+        var priority = result.priority;
+        if (transport_request_should_ignore(room, request)) {
+            callback_util.del(request.start_callback);
+            callback_util.del(request.end_callback);
+        } else {
+            MultiQueue.enqueue(new_queue, priority, request);
+        }
+    }
+};
+
+var clear_ignored_requests = function(room) {
+    var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
+    t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.SOURCE] = clear_impl(room, t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.SOURCE]);
+    t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET] = clear_impl(room, t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET]);
+};
+
 /**
  * Enqueue each request at most once
  **/
@@ -69,6 +102,8 @@ var add_to_transport_queue = function(room, priority, request, source) {
         ++room.memory[constants.TRANSPORT_REQUEST_TRACKER_NEXT_ID];
         room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id] = false;
     }
+    
+    if (request.id % 50 == 0) clear_ignored_requests(room);
     
     var t_queues = room.memory[constants.TRANSPORT_QUEUE_CONSTANTS.TRANSPORT_QUEUES];
     var queue = null;
@@ -108,17 +143,6 @@ var get_transport_queue_length = function(room, is_source) {
         queue = t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET];
     }
     return MultiQueue.getLength(queue);
-};
-
-var transport_request_mark_ignore = function(room, request) {
-    room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id] = true;
-};
-
-var transport_request_should_ignore = function(room, request) {
-    if (request.id === null) {
-        return false;
-    }
-    return room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
 };
 
 module.exports = {
