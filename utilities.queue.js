@@ -135,6 +135,24 @@ var MultiQueue = {
     return item;
   },
 
+  /* Dequeues an item and returns {item:..., priority:...}. If the queue is empty, the value
+   * 'undefined' is returned.
+   */
+  dequeue_with_priority: function(queues){
+
+    var max_p = getMaxPriority(queues);
+    if (max_p === undefined) {
+        return undefined;
+    }
+
+    var item = Queue.dequeue(queues[max_p]);
+    if (Queue.isEmpty(queues[max_p])) {
+        delete queues[max_p];
+    }
+
+    return {item:item, priority:max_p};
+  },
+
   /* Returns the item at the front of the queue (without dequeuing it). If the
    * queue is empty then undefined is returned.
    */

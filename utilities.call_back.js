@@ -57,7 +57,7 @@
  }
  
  var del = function(cb_id) {
-     if (cb_id || cb_id === 0) {
+     if (cb_id) {
         delete Memory.callbacks[cb_id];
      }
  }
