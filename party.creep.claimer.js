@@ -1,10 +1,7 @@
-// TODO totally not done, also not yet a role in the role_enum
-// TODO this could probably just wrap around the transport role
-
 var constants = require('creep.constants');
 
 var memory_init = function(room, creep_body) {
-    return {target_room_name:null, should_claim: true, err_code: OK, finished: true, role: constants.role_enum.};
+    return {target_room_name:null, should_claim: true, err_code: OK, finished: true, role: constants.role_enum.PARTY_CLAIMER};
 };
 
 var startup_creep = function(creep_memory) {

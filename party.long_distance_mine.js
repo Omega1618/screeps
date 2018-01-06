@@ -15,11 +15,9 @@
  * TODO -- in the future you may want to avoid mining from rooms adjacent to hostile rooms.
  * TODO -- need to communicate to the origin room on whether it makes sense to try to create this party.  
  *      For example, if we find no good sources or all adjacent rooms are occupied or all adjacent rooms are already being mined.
- *      Should put this in stats but have it be set here.
+ *      Should put this in stats but have it be set in stats from here.
  * TODO need to calculate the correct amount of WORKER parts on MINERS and CARRY parts on harvesters for both unreserved and reserved rooms.
  *          For now just assume things aren't reserved and use a fixed size miner and transporter.
- * TODO calculate incoming energy and report it to the phase2 room for spawn logic.  Also calculate the correct number of carry parts in the transport.
- * TODO use throughput in transport creep.
  **/
  
 var constants = require('creep.constants');

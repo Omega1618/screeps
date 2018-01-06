@@ -1,7 +1,3 @@
-// TODO totally not done, also not yet a role in the role_enum
-
-// Try to make this generic and provide helper functions that make the transporter useful in a variety of cases.
-
 var constants = require('creep.constants');
 var roleTransport = require('creep.phase2.transport');
 var callback_util = require('utilities.call_back');

@@ -11,6 +11,7 @@
  * TODO should make an entry in stats for rooms that construction planning failed.
  *
  * Can probably do this with 1 miner, 1 transport, and 1 builder.  You first need to claim the room with a claimer, but the claimer can be immediately recycled.
+ * Edit, with the way the builder is set up, you won't need a transport.
  *
  **/
 
@@ -26,15 +27,16 @@ var Make_Transport_Request = require("utilities.transport_request");
  
 var recyclerRole = require('creep.recycler');
 var scoutRole = require('party.creep.scout');
-var transportRole = require('party.creep.transport');
+// var transportRole = require('party.creep.transport');
 var claimerRole = require('party.creep.claimer');
+var minerRole = require('party.long_distance_mine.creep.miner');
 
  var memory_init = function (room_of_origin) {
     return {origin_room_name: room_of_origin.name,
     scout_name: null,
     claimer_name: null,
     builder_name: null,
-    transport_names: [],
+    miner_name: null,
     
     target_room: null,
     is_planned: false,
@@ -50,7 +52,17 @@ var startup =  function (party_memory) {
  
 // For now just looks for claim flags
 var get_target_room = function (party_memory) {
-    // TODO
+    
+    for (let flag_name in Game.flags) {
+        var flag = Game.flags[flag_name];
+        if (flag.color == constants.CLAIM_COLOR && flag_name.split("_")[0] == party_memory.origin_room_name) {
+            party_memory.target_room = flag.pos.roomName;
+            return;
+        }
+    }
+    
+    party_memory.finished = true;
+    // TODO if flag doesn't exist try to find a suitable room
 };
 
 var plan_room_layout = function (party_memory) {
@@ -107,11 +119,29 @@ var claim_room = function (party_memory) {
     }
 };
 
-// For now just build the spawn, in the future build the first 5 extensions.
 var build_room = function (party_memory) {
-    // TODO
-    // Do miner first, then builder, then transport
-    // Miner can produce resources while things are happenning
+    
+    // TODO Spawn things we don't have
+    /**
+    if (!party_memory.miner_name && party_util.can_help(origin_room) && origin_room.energyAvailable >= 400) {
+        var miner_name = party_util.spawn_creep_get_name(origin_room, minerRole, 400);
+        if (miner_name) {
+            party_memory.miner_name = miner_name;
+        }
+    } else if (party_memory.transport_names.length == 0 && party_util.can_help(origin_room) && origin_room.energyAvailable >= 450) {
+        var transport_name = party_util.spawn_creep_get_name(origin_room, transportRole, Math.min(600, origin_room.energyAvailable));
+        if (transport_name) {
+            party_memory.transport_names.push(transport_name);
+        }
+    }
+    */
+    
+    // TODO just build the miner and builde in that order and set their target rooms to the target room.
+    // TODO Finish when room enters phase 2
+    // TODO there will be a hiccup when the spawn finished and the controller is level 1, you won't be able to build extensions until RCL2.
+    // You can see this when the builder's finished flag is true.
+    // TODO in the mean time, just have the builder transfer energy to the spawn from the miner.
+    // TODO If the builder dies and the spawn exists, just disband the party
 };
 
 var run = function (party_memory) {

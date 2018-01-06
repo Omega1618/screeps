@@ -1,4 +1,3 @@
-// TODO totally not done, also not yet a role in the role_enum
 // TODO this could probably just wrap around the transport role
 
 var constants = require('creep.constants');
