@@ -17,12 +17,19 @@ var shutdown_creep = function(creep_memory) {
 var run = function(creep) {
     var current_room = creep.room;
     if (current_room.name != creep.memory.target_room_name) {
-        creep.travelTo(new RoomPosition(25, 25, creep.memory.target_room_name));
+        creep.travelToRoom(creep.memory.target_room_name);
         return;
     }
     
     var source_id = creep.memory.source_id;
-    if (!source_id) {
+    var source = null;
+    if (source_id) {
+        source = Game.getObjectById(source_id);
+        if (source === null) {
+            creep.suicide();
+            return;
+        }
+    } else {
         var original_sources = current_room.find(FIND_SOURCES);
         var sources = original_sources;
         var source_keepers = current_room.find(FIND_STRUCTURES, {
@@ -41,12 +48,7 @@ var run = function(creep) {
             return;
         }
         creep.memory.source_id = target_source.id;
-    }
-    
-    var source = Game.getObjectById(source_id);
-    if (source === null) {
-        creep.suicide();
-        return;
+        source = target_source;
     }
     
     var err_code = creep.harvest(source);

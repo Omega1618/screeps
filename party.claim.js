@@ -9,6 +9,7 @@
  * The transporter should carry back energy to the home room, drop it, then create a request to pick it up.
  *
  * TODO should make an entry in stats for rooms that construction planning failed.
+ * TODO check that the GCL allows you to have 1 more room.
  *
  * Can probably do this with 1 miner, 1 transport, and 1 builder.  You first need to claim the room with a claimer, but the claimer can be immediately recycled.
  * Edit, with the way the builder is set up, you won't need a transport.
@@ -58,6 +59,7 @@ var get_target_room = function (party_memory) {
         var flag = Game.flags[flag_name];
         if (flag.color == constants.CLAIM_COLOR && flag_name.split("_")[0] == party_memory.origin_room_name) {
             party_memory.target_room = flag.pos.roomName;
+            flag.remove();
             return;
         }
     }
@@ -68,6 +70,12 @@ var get_target_room = function (party_memory) {
 };
 
 var plan_room_layout = function (party_memory) {
+    var origin_room = Game.rooms[party_memory.origin_room_name];
+    if (!origin_room) {
+        party_memory.finished = true;
+        return;
+    }
+    
     if (Memory.rooms[party_memory.target_room] 
         && Memory.rooms[party_memory.target_room].construction_planned_flag) {
         party_memory.is_planned = true;
@@ -84,7 +92,7 @@ var plan_room_layout = function (party_memory) {
     var scout = party_memory.scout_name;
     if (scout) scout = Game.creeps[scout];
     if (scout) {
-        scoutRole.set_new_target(scout, origin_room.name);
+        scoutRole.set_new_target(scout, party_memory.target_room);
     } else {
         party_memory.scout_name = null;
     }
@@ -115,7 +123,7 @@ var claim_room = function (party_memory) {
     var claimer = party_memory.claimer_name;
     if (claimer) claimer = Game.creeps[claimer];
     if (claimer) {
-        claimerRole.set_new_target(claimer, origin_room.name, true);
+        claimerRole.set_new_target(claimer, party_memory.target_room, true);
     } else {
         party_memory.claimer_name = null;
     }
@@ -131,14 +139,21 @@ var build_room = function (party_memory) {
     
     // Spawn things we don't have
     if (!party_memory.miner_name && party_util.can_help(origin_room) && origin_room.energyAvailable >= 750) {
-        var miner_name = party_util.spawn_creep_get_name(origin_room, minerRole, 750);
+        var new_minerRole = Object.assign({}, minerRole);
+        new_minerRole.suggested_body = function(energy) {
+            if (energy < 750) {
+                return null;
+            }
+            return [MOVE, MOVE, MOVE, MOVE, MOVE, WORK, WORK, WORK, WORK, WORK];
+        };
+        var miner_name = party_util.spawn_creep_get_name(origin_room, new_minerRole, 750);
         if (miner_name) {
             party_memory.miner_name = miner_name;
             var miner = Game.creeps[miner_name];
             minerRole.set_new_target(miner, party_memory.target_room);
         }
     } else if (!party_memory.builder_name && party_util.can_help(origin_room) && origin_room.energyAvailable >= 750) {
-        var builder_name = party_util.spawn_creep_get_name(origin_room, builderRole, 750);
+        var builder_name = party_util.spawn_creep_get_name(origin_room, builderRole, origin_room.energyAvailable);
         if (builder_name) {
             party_memory.builder_name = builder_name;
             var builder = Game.creeps[builder_name];

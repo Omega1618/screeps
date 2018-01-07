@@ -50,7 +50,7 @@ var recharge = function (creep) {
         return;
     }
     
-    var resources = creep.room.find(FIND_DROPPED_ENERGY);
+    var resources = creep.room.find(FIND_DROPPED_RESOURCES, {filter: {resourceType: RESOURCE_ENERGY}});
     if (resources.length > 0) {
         creep.memory.resource_id = resources[0].id;
         return;
@@ -60,7 +60,7 @@ var recharge = function (creep) {
     if (source) {
         creep.memory.source_id = source.id;
     }
-}
+};
 
 /** @param {Creep} creep **/
 var run = function(creep) {
@@ -72,7 +72,7 @@ var run = function(creep) {
     
     if (!creep.memory.finished) {
         var current_room = creep.room;
-        if (room.name == target_room_name) {
+        if (current_room.name == target_room_name) {
             if (creep.memory.is_recharging || creep.carry.energy == 0) {
                 recharge(creep);
                 return;
@@ -83,7 +83,7 @@ var run = function(creep) {
                     if (cite) creep.memory.target_site_id = cite.id;
             }            
             if (!creep.memory.target_site_id) { 
-                if (!room_layout.create_next_construction_site(room.name)) {
+                if (!room_layout.create_next_construction_site(current_room.name)) {
                     creep.memory.finished = true;
                     return;
                 }
@@ -110,10 +110,10 @@ var run = function(creep) {
 
 var suggested_body = function(energy) {
     
-    if (energy <= 750) return null;
+    if (energy < 750) return null;
     var body = [CARRY, CARRY, CARRY, WORK, WORK, WORK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
     energy -= 750;
-    for (var i = 0; i < 3 && energy >= 100; ++i) {
+    for (var i = 0; i < 5 && energy >= 100; ++i) {
         body.push(MOVE);
         body.push(CARRY);
         energy -= 100;
@@ -125,11 +125,11 @@ var suggested_body = function(energy) {
 var set_new_target = function(creep, room_name) {
     creep.memory.target_room_name = room_name;
     creep.memory.finished = false;
-}
+};
 
 var is_finished = function(creep) {
     return creep.memory.finished;
-}
+};
 
 module.exports = {memory_init:memory_init, run:run, startup_creep:startup_creep, shutdown_creep:shutdown_creep,
                   suggested_body: suggested_body, set_new_target: set_new_target, is_finished: is_finished

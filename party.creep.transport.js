@@ -25,6 +25,11 @@ var startup_creep = function(creep_memory) {
 };
 
 var shutdown_creep = function(creep_memory) {
+    var request = creep_memory.request;
+    if (request !== null) {
+        callback_util.exec(request.end_callback);
+        creep_memory.request = null;
+    }
 };
 
 /** @param {Creep} creep **/

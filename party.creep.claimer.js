@@ -20,13 +20,13 @@ var run = function(creep) {
     
     if (!creep.memory.finished) {
         var current_room = creep.room;
-        if (room.name == target_room_name) {
+        if (current_room.name == target_room_name) {
             if (creep.memory.should_claim) {
-                creep.memory.err_code = creep.claimController(room.controller);
+                creep.memory.err_code = creep.claimController(current_room.controller);
             } else {
-                creep.memory.err_code = creep.reserveController(room.controller);
+                creep.memory.err_code = creep.reserveController(current_room.controller);
             }
-            if (creep.memory.err_code == ERR_NOT_IN_RANGE) creep.travelTo(room.controller);
+            if (creep.memory.err_code == ERR_NOT_IN_RANGE) creep.travelTo(current_room.controller);
             if (creep.memory.err_code == OK && creep.memory.should_claim) creep.memory.finished = true; 
         } else {
             creep.memory.err_code = creep.travelToRoom(target_room_name);

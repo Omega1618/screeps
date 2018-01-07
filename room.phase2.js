@@ -117,6 +117,17 @@ var try_party = function (room) {
         }
     }
     
+    for (let flag_name in Game.flags) {
+        var flag = Game.flags[flag_name];
+        if (flag.color == constants.CLAIM_COLOR && flag_name.split("_")[0] == room.name) {
+            var party_id = party_manager.create_party(room, pe.CLAIM);
+            if (party_id) {
+                party_data[pe.CLAIM].push(party_id);
+                return OK;
+            }
+        }
+    }
+    
     // TODO, make sure you have enough CPU in the bucket
     // TODO, parties should use resources from the storage and should only be created if enough resources are available in the storage.
     return ERR_FULL;
@@ -219,11 +230,17 @@ var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( funct
     new_request.target = request.target;
     new_request.type = request.type;
     new_request.end_callback = callback_util.register_callback(cb_fn_id, context);
+        
+    var priority = constants.SPAWNER_REQUEST_PRIORITY;
+    if (new_request.target) {
+        var structure = Game.getObjectById(new_request.target);
+        if (structure && structure.structureType == STRUCTURE_TOWER) priority = constants.TOWER_REQUEST_PRIORITY;
+    }
     
     var is_source = false;
     var room = target.room;
     
-    util.add_to_transport_queue(room, constants.SPAWNER_REQUEST_PRIORITY, new_request, is_source);
+    util.add_to_transport_queue(room, priority, new_request, is_source);
 });
 
 var make_structure_energy_requests = function(room) {
@@ -248,8 +265,12 @@ var make_structure_energy_requests = function(room) {
         
         room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = true;
         
+        var priority = constants.SPAWNER_REQUEST_PRIORITY;
+        var structure = Game.getObjectById(new_request.target);
+        if (structure && structure.structureType == STRUCTURE_TOWER) priority = constants.TOWER_REQUEST_PRIORITY;
+        
         var is_source = false;
-        util.add_to_transport_queue(room, constants.SPAWNER_REQUEST_PRIORITY, new_request, is_source);
+        util.add_to_transport_queue(room, priority, new_request, is_source);
     });
 }
  
@@ -275,14 +296,16 @@ var run_room = function(room) {
     }
     
     if (Game.time % 10 == 1) {
-        var defend_list = room.memory[constants.ROOM_PARTIES][constants.party_enum.DEFEND];
+        var pe = constants.party_enum;
+        var defend_list = room.memory[constants.ROOM_PARTIES][pe.DEFEND];
+        if (defend_list.length > 0) {
+            if(!party_manager.is_active(defend_list[0])) defend_list.pop();
+        }
         if (defend_list.length === 0) {
             var party_id = party_manager.create_party(room, pe.DEFEND);
             if(party_id) defend_list.push(party_id);
         }
     }
-    
-    // TODO something for the claim party
 };
 
 var can_help = function(room) {

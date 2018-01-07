@@ -135,7 +135,7 @@ var return_energy_to_storage = function(creep) {
     if (!storage) return ERR_INVALID_TARGET;
     
     var request = Make_Transport_Request();
-    request.target = target.id;
+    request.target = storage.id;
     request.type = RESOURCE_ENERGY;
     return transportRole.add_request(creep, request);
 };
@@ -157,7 +157,7 @@ var transport_helper = function(creep, party_memory) {
         miner = Game.creeps[miner];
     }
     if (!miner) {
-        should_return_energy = true;
+        should_return_energy = true; // TODO keep returning dropped energy even when miner is dead.
     }
     
     creep.memory.should_return_energy = should_return_energy;
