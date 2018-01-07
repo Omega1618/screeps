@@ -151,6 +151,7 @@ var try_spawn = function(room) {
     }
     
     var incoming_energy = room.memory[constants.NUM_SAFE_SOURCES] * 10; // TODO update this with source keeper sources.
+    var base_incoming_energy = incoming_energy;
     var mining_parties = room.memory[constants.ROOM_PARTIES][constants.party_enum.LONG_DISTANCE_MINE];
     for (var i = 0; i < mining_parties.length; ++i) {
         var party_memory = Memory.parties[mining_parties[i]];
@@ -174,7 +175,7 @@ var try_spawn = function(room) {
     // Hence the optimal transport carry parts is incoming_energy * 75 / 50 = incoming_energy * 1.5
     // In general room.memory[constants.TRANSPORT_CARRY_PARTS] = incoming_energy * 1.5 * avg_dist / 50.0
     // Could potentialy use a moving average of the number of ticks the transports take to calculate average distance
-    if (room.memory[constants.TRANSPORT_CARRY_PARTS] < incoming_energy * 1.5) {
+    if (room.memory[constants.TRANSPORT_CARRY_PARTS] < base_incoming_energy * 1.5) {
         return util.spawn_creep(room, roleTransport, ae);
     }
     
@@ -182,7 +183,8 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleRepairer, ae);
     }
     
-    if (builder_outgoing_energy < incoming_energy * builder_output_percentage) {
+    // TODO cache construction cite
+    if (builder_outgoing_energy < incoming_energy * builder_output_percentage && room.find(FIND_CONSTRUCTION_SITES).length > 0) {
         return util.spawn_creep(room, roleBuilder, ae);
     }
     
@@ -265,12 +267,22 @@ var run_room = function(room) {
         // TODO also need to coordinate repair structures with repairing other things with the repairer.
         var defense_target = room_layout.get_next_defense_target(room.name);
     }
-    if (Game.time % 10 == 0 && room.memory[constants.NUM_STATIC_BUILDER]) {
+    if (Game.time % 10 == 0) {
         // TODO cache construction site
         if(room.find(FIND_CONSTRUCTION_SITES).length == 0) {
             try_build(room);
         }
     }
+    
+    if (Game.time % 10 == 1) {
+        var defend_list = room.memory[constants.ROOM_PARTIES][constants.party_enum.DEFEND];
+        if (defend_list.length === 0) {
+            var party_id = party_manager.create_party(room, pe.DEFEND);
+            if(party_id) defend_list.push(party_id);
+        }
+    }
+    
+    // TODO something for the claim party
 };
 
 var can_help = function(room) {

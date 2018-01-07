@@ -45,14 +45,9 @@ var check_and_get_request = function(creep) {
     
     var room = creep.room;
     var request = room_utils.get_from_transport_queue(room, creep.memory.find_source);
-    if (request !== undefined) {
-        if (room_utils.transport_request_should_ignore(room, request)) {
-            callback_util.del(request.start_callback);
-            callback_util.del(request.end_callback);
-        } else {
-            creep.memory.request = request;
-            callback_util.exec(request.start_callback);
-        }
+    if (request) {
+        creep.memory.request = request;
+        callback_util.exec(request.start_callback);
     }
 }
 

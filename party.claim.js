@@ -30,6 +30,7 @@ var scoutRole = require('party.creep.scout');
 // var transportRole = require('party.creep.transport');
 var claimerRole = require('party.creep.claimer');
 var minerRole = require('party.long_distance_mine.creep.miner');
+var builderRole = require('party.creep.builder');
 
  var memory_init = function (room_of_origin) {
     return {origin_room_name: room_of_origin.name,
@@ -62,6 +63,7 @@ var get_target_room = function (party_memory) {
     }
     
     party_memory.finished = true;
+    // TODO check in stats that we haven't already tried to expand here and found it inhospitable.
     // TODO if flag doesn't exist try to find a suitable room
 };
 
@@ -121,22 +123,42 @@ var claim_room = function (party_memory) {
 
 var build_room = function (party_memory) {
     
-    // TODO Spawn things we don't have
-    /**
-    if (!party_memory.miner_name && party_util.can_help(origin_room) && origin_room.energyAvailable >= 400) {
-        var miner_name = party_util.spawn_creep_get_name(origin_room, minerRole, 400);
+    var origin_room = Game.rooms[party_memory.origin_room_name];
+    if (!origin_room) {
+        party_memory.finished = true;
+        return;
+    }
+    
+    // Spawn things we don't have
+    if (!party_memory.miner_name && party_util.can_help(origin_room) && origin_room.energyAvailable >= 750) {
+        var miner_name = party_util.spawn_creep_get_name(origin_room, minerRole, 750);
         if (miner_name) {
             party_memory.miner_name = miner_name;
+            var miner = Game.creeps[miner_name];
+            minerRole.set_new_target(miner, party_memory.target_room);
         }
-    } else if (party_memory.transport_names.length == 0 && party_util.can_help(origin_room) && origin_room.energyAvailable >= 450) {
-        var transport_name = party_util.spawn_creep_get_name(origin_room, transportRole, Math.min(600, origin_room.energyAvailable));
-        if (transport_name) {
-            party_memory.transport_names.push(transport_name);
+    } else if (!party_memory.builder_name && party_util.can_help(origin_room) && origin_room.energyAvailable >= 750) {
+        var builder_name = party_util.spawn_creep_get_name(origin_room, builderRole, 750);
+        if (builder_name) {
+            party_memory.builder_name = builder_name;
+            var builder = Game.creeps[builder_name];
+            builderRole.set_new_target(builder, party_memory.target_room);
         }
     }
-    */
     
-    // TODO just build the miner and builde in that order and set their target rooms to the target room.
+    if (party_memory.miner_name) {
+        var miner = Game.creeps[party_memory.miner_name];
+        if (!miner) party_memory.miner_name = null;
+    }
+    if (party_memory.builder_name) {
+        var builder = Game.creeps[party_memory.builder_name];
+        if (builder) {
+            if (builderRole.is_finished(builder)) party_memory.finished = true;
+        } else {
+            party_memory.builder_name = null;
+        }
+    }
+    
     // TODO Finish when room enters phase 2
     // TODO there will be a hiccup when the spawn finished and the controller is level 1, you won't be able to build extensions until RCL2.
     // You can see this when the builder's finished flag is true.
@@ -170,14 +192,17 @@ var force_disband = function (party_memory) {
 };
  
  var shutdown = function (party_memory) {
-    // TODO
+    recyclerRole.name_to_recycler(party_memory.scout_name, scoutRole.shutdown_creep);
+    recyclerRole.name_to_recycler(party_memory.claimer_name, claimerRole.shutdown_creep);
+    recyclerRole.name_to_recycler(party_memory.builder_name, builderRole.shutdown_creep);
+    recyclerRole.name_to_recycler(party_memory.miner_name, minerRole.shutdown_creep);
  };
  
 module.exports = {
-  memory_init: function (room_of_origin) { return {module_id: null} },
-  startup: function (party_memory) {},
-  run: function (party_memory) {},
-  force_disband: function (party_memory) {},
-  should_disband: function (party_memory) {},
-  shutdown: function (party_memory) {} 
+  memory_init: memory_init,
+  startup: startup,
+  run: run,
+  force_disband: force_disband,
+  should_disband: should_disband,
+  shutdown: shutdown 
 };

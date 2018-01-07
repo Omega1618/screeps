@@ -125,11 +125,22 @@ var get_from_transport_queue = function(room, source) {
     } else {
         queue = t_queues[constants.TRANSPORT_QUEUE_CONSTANTS.TARGET];
     }
-    var request = MultiQueue.dequeue(queue);
-    if (request !== undefined) {
-        delete room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
+    
+    while (true) {
+        var request = MultiQueue.dequeue(queue);
+        if (request) {
+            delete room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
+        } else {
+            return request;
+        }
+        
+        if (transport_request_should_ignore(room, request)) {
+            callback_util.del(request.start_callback);
+            callback_util.del(request.end_callback);  
+        } else {
+            return request;
+        }
     }
-    return request;
 };
 
 var get_transport_queue_length = function(room, is_source) {
