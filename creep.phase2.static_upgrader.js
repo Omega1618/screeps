@@ -69,34 +69,15 @@ var suggested_body = function(energy) {
     if (energy < 350) {
         return null;
     }
-    var body = [MOVE, CARRY, CARRY];
-    energy -= 150;
-    
-    var num_worker_parts = (energy - (energy % 100)) / 100;
-    num_worker_parts = Math.min(num_worker_parts, 4);
-    for(var i = 0; i < num_worker_parts; ++i) {
-        body.push(WORK);
-    }
-    energy -= 100 * num_worker_parts;
-    
-    for (var i = 0; i < 2; i++) {
-        if (energy >= 50) {
-            body.push(CARRY);
-            energy -= 50;
-        }
-    }
-    
-    if (energy >= 100) {
-        body.push(WORK);
-        energy -= 100;
-    }
-
-    for(var i = 0; i < 5 && energy >= 300; ++i) {
-        body.push(MOVE);
+    var body = [];
+    for(var i = 0; i < 15 && energy >= 150; ++i) {
         body.push(CARRY);
         body.push(WORK);
-        body.push(WORK);
-        energy -= 300;
+        energy -= 150;
+        if (energy >= 50 && i % 2 == 0) {
+            body.push(MOVE);
+            energy -= 50;
+        }
     }
     return body;
 };

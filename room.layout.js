@@ -680,7 +680,7 @@ var create_next_construction_site = function (room_name) {
         return false
     }
     var room = Game.rooms[room_name]
-    return room.constructNextMissingStructure()
+    return room.constructNextMissingStructure() === OK;
 }
 
 var save_wall_layout_to_memory = function (room) { 

@@ -15,11 +15,9 @@
  * TODO -- in the future you may want to avoid mining from rooms adjacent to hostile rooms.
  * TODO -- need to communicate to the origin room on whether it makes sense to try to create this party.  
  *      For example, if we find no good sources or all adjacent rooms are occupied or all adjacent rooms are already being mined.
- *      Should put this in stats but have it be set here.
+ *      Should put this in stats but have it be set in stats from here.
  * TODO need to calculate the correct amount of WORKER parts on MINERS and CARRY parts on harvesters for both unreserved and reserved rooms.
  *          For now just assume things aren't reserved and use a fixed size miner and transporter.
- * TODO calculate incoming energy and report it to the phase2 room for spawn logic.  Also calculate the correct number of carry parts in the transport.
- * TODO use throughput in transport creep.
  **/
  
 var constants = require('creep.constants');
@@ -111,12 +109,36 @@ var find_target_room = function(party_memory) {
     }
 }
 
+/**
 var transport_reset_request_callback = callback_util.register_callback_fn( function(creep_name) {
     var creep = Game.creeps[creep_name];
     if (creep && creep.memory.pickup_request) {
         delete creep.memory.pickup_request;
     }
 });
+
+var make_pickup_request = function(creep) {
+    var request = Make_Transport_Request();
+    request.source = creep.id;
+    request.type = RESOURCE_ENERGY;
+    request.source_type = constants.TRANSPORT_SOURCE_TYPES.CREEP;
+    request.end_callback = callback_util.register_callback(transport_reset_request_callback, creep.name);
+    
+    creep.memory.pickup_request = request;
+    
+    room_utils.add_to_transport_queue(creep.room, constants.REMOTE_MINING_IMPORT_PRIORITY, request, true);
+};
+**/
+
+var return_energy_to_storage = function(creep) {
+    var storage = creep.room.storage;
+    if (!storage) return ERR_INVALID_TARGET;
+    
+    var request = Make_Transport_Request();
+    request.target = storage.id;
+    request.type = RESOURCE_ENERGY;
+    return transportRole.add_request(creep, request);
+};
 
 var transport_helper = function(creep, party_memory) {
     if (!creep.memory.finished || creep.memory.pickup_request) {
@@ -135,25 +157,23 @@ var transport_helper = function(creep, party_memory) {
         miner = Game.creeps[miner];
     }
     if (!miner) {
-        should_return_energy = true;
+        should_return_energy = true; // TODO keep returning dropped energy even when miner is dead.
     }
     
     creep.memory.should_return_energy = should_return_energy;
     
+    var creep_room = creep.room;
     if (should_return_energy) {
-        if (creep.room.name == party_memory.origin_room_name) {
-            if (!creep.memory.pickup_request) {
-                var request = Make_Transport_Request();
-                request.source = creep.id;
-                request.type = RESOURCE_ENERGY;
-                request.source_type = constants.TRANSPORT_SOURCE_TYPES.CREEP;
-                request.end_callback = callback_util.register_callback(transport_reset_request_callback, creep.name);
-                
-                creep.memory.pickup_request = request;
-                
-                room_utils.add_to_transport_queue(creep.room, constants.REMOTE_MINING_IMPORT_PRIORITY, request, true);
+        if (creep_room.name == party_memory.origin_room_name) {
+            
+            if (creep.carry.energy <= creep.carryCapacity * 0.2 || room_utils.get_transport_queue_length(creep_room, false) == 0) {
+                var err_code = return_energy_to_storage(creep)
+                if (err_code != ERR_INVALID_TARGET) return err_code;
             }
-            creep.travelToCachedPath();
+            var request = room_utils.get_from_transport_queue(creep_room, false);
+            if (request) return transportRole.add_request(creep, request);
+            
+            return creep.travelToCachedPath();
         } else {
             return transportRole.move_to_room(creep, party_memory.origin_room_name);
         }

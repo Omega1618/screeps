@@ -37,7 +37,10 @@ var constants = require('creep.constants');
  var scan_threats = function(party_memory) {
      // TODO should try to keep track of creeps the just move out of the room
      var room = Game.rooms[party_memory.origin_room_name];
-     if (!room) return;
+     if (!room) {
+         party_memory.finished = true;
+         return;
+     }
      var enemy_creeps = room.find(FIND_HOSTILE_CREEPS);
      
      // remove old enemy creeps

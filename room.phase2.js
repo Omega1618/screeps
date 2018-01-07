@@ -117,6 +117,17 @@ var try_party = function (room) {
         }
     }
     
+    for (let flag_name in Game.flags) {
+        var flag = Game.flags[flag_name];
+        if (flag.color == constants.CLAIM_COLOR && flag_name.split("_")[0] == room.name) {
+            var party_id = party_manager.create_party(room, pe.CLAIM);
+            if (party_id) {
+                party_data[pe.CLAIM].push(party_id);
+                return OK;
+            }
+        }
+    }
+    
     // TODO, make sure you have enough CPU in the bucket
     // TODO, parties should use resources from the storage and should only be created if enough resources are available in the storage.
     return ERR_FULL;
@@ -151,6 +162,7 @@ var try_spawn = function(room) {
     }
     
     var incoming_energy = room.memory[constants.NUM_SAFE_SOURCES] * 10; // TODO update this with source keeper sources.
+    var base_incoming_energy = incoming_energy;
     var mining_parties = room.memory[constants.ROOM_PARTIES][constants.party_enum.LONG_DISTANCE_MINE];
     for (var i = 0; i < mining_parties.length; ++i) {
         var party_memory = Memory.parties[mining_parties[i]];
@@ -174,7 +186,7 @@ var try_spawn = function(room) {
     // Hence the optimal transport carry parts is incoming_energy * 75 / 50 = incoming_energy * 1.5
     // In general room.memory[constants.TRANSPORT_CARRY_PARTS] = incoming_energy * 1.5 * avg_dist / 50.0
     // Could potentialy use a moving average of the number of ticks the transports take to calculate average distance
-    if (room.memory[constants.TRANSPORT_CARRY_PARTS] < incoming_energy * 1.5) {
+    if (room.memory[constants.TRANSPORT_CARRY_PARTS] < base_incoming_energy * 1.5) {
         return util.spawn_creep(room, roleTransport, ae);
     }
     
@@ -182,7 +194,8 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleRepairer, ae);
     }
     
-    if (builder_outgoing_energy < incoming_energy * builder_output_percentage) {
+    // TODO cache construction cite
+    if (builder_outgoing_energy < incoming_energy * builder_output_percentage && room.find(FIND_CONSTRUCTION_SITES).length > 0) {
         return util.spawn_creep(room, roleBuilder, ae);
     }
     
@@ -217,11 +230,17 @@ var renew_if_not_full_callback_fn_id = callback_util.register_callback_fn( funct
     new_request.target = request.target;
     new_request.type = request.type;
     new_request.end_callback = callback_util.register_callback(cb_fn_id, context);
+        
+    var priority = constants.SPAWNER_REQUEST_PRIORITY;
+    if (new_request.target) {
+        var structure = Game.getObjectById(new_request.target);
+        if (structure && structure.structureType == STRUCTURE_TOWER) priority = constants.TOWER_REQUEST_PRIORITY;
+    }
     
     var is_source = false;
     var room = target.room;
     
-    util.add_to_transport_queue(room, constants.SPAWNER_REQUEST_PRIORITY, new_request, is_source);
+    util.add_to_transport_queue(room, priority, new_request, is_source);
 });
 
 var make_structure_energy_requests = function(room) {
@@ -246,8 +265,12 @@ var make_structure_energy_requests = function(room) {
         
         room.memory[constants.TRANSPORT_STRUCTURE_ENERGY_REQUEST][target.id] = true;
         
+        var priority = constants.SPAWNER_REQUEST_PRIORITY;
+        var structure = Game.getObjectById(new_request.target);
+        if (structure && structure.structureType == STRUCTURE_TOWER) priority = constants.TOWER_REQUEST_PRIORITY;
+        
         var is_source = false;
-        util.add_to_transport_queue(room, constants.SPAWNER_REQUEST_PRIORITY, new_request, is_source);
+        util.add_to_transport_queue(room, priority, new_request, is_source);
     });
 }
  
@@ -265,10 +288,22 @@ var run_room = function(room) {
         // TODO also need to coordinate repair structures with repairing other things with the repairer.
         var defense_target = room_layout.get_next_defense_target(room.name);
     }
-    if (Game.time % 10 == 0 && room.memory[constants.NUM_STATIC_BUILDER]) {
+    if (Game.time % 10 == 0) {
         // TODO cache construction site
         if(room.find(FIND_CONSTRUCTION_SITES).length == 0) {
             try_build(room);
+        }
+    }
+    
+    if (Game.time % 10 == 1) {
+        var pe = constants.party_enum;
+        var defend_list = room.memory[constants.ROOM_PARTIES][pe.DEFEND];
+        if (defend_list.length > 0) {
+            if(!party_manager.is_active(defend_list[0])) defend_list.pop();
+        }
+        if (defend_list.length === 0) {
+            var party_id = party_manager.create_party(room, pe.DEFEND);
+            if(party_id) defend_list.push(party_id);
         }
     }
 };

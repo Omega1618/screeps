@@ -45,14 +45,9 @@ var check_and_get_request = function(creep) {
     
     var room = creep.room;
     var request = room_utils.get_from_transport_queue(room, creep.memory.find_source);
-    if (request !== undefined) {
-        if (room_utils.transport_request_should_ignore(room, request)) {
-            callback_util.del(request.start_callback);
-            callback_util.del(request.end_callback);
-        } else {
-            creep.memory.request = request;
-            callback_util.exec(request.start_callback);
-        }
+    if (request) {
+        creep.memory.request = request;
+        callback_util.exec(request.start_callback);
     }
 }
 
@@ -64,6 +59,10 @@ var parse_source = function(creep, request) {
          case constants.TRANSPORT_SOURCE_TYPES.POSITION:
              // TODO look for a resource that matches request.type
              source = new RoomPosition(source.x, source.y, source.roomName);
+             if (!Game.rooms[source.roomName]) {
+                 err_code = ERR_NOT_IN_RANGE;
+                 break;
+             }
              source = source.lookFor(LOOK_ENERGY);
              if (source.length == 0) {
                  err_code = OK;
