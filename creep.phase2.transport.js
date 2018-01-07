@@ -59,6 +59,10 @@ var parse_source = function(creep, request) {
          case constants.TRANSPORT_SOURCE_TYPES.POSITION:
              // TODO look for a resource that matches request.type
              source = new RoomPosition(source.x, source.y, source.roomName);
+             if (!Game.rooms[source.roomName]) {
+                 err_code = ERR_NOT_IN_RANGE;
+                 break;
+             }
              source = source.lookFor(LOOK_ENERGY);
              if (source.length == 0) {
                  err_code = OK;
