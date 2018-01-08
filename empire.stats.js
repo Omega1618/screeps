@@ -108,11 +108,19 @@ var clear_old_room_stats = function (age) {
     }
 }
 
+var cpu_moving_mean = function() {
+    var cpu_used = Game.cpu.getUsed();
+    Memory.cpu_moving_mean = (Memory.cpu_moving_mean | cpu_used) * 0.999 + 0.001 * cpu_used;
+    return Memory.cpu_moving_mean;
+};
+
 module.exports = {
     empire_stat_names: empire_stat_names,
     room_stat_names: room_stat_names,
     
     populate_room_stats: populate_room_stats,
     get_room_stat: get_room_stat,
-    clear_old_room_stats: clear_old_room_stats
+    clear_old_room_stats: clear_old_room_stats,
+    
+    cpu_moving_mean: cpu_moving_mean
 };
