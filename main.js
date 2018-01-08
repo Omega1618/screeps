@@ -21,6 +21,7 @@ module.exports.loop = function () {
     if (tick % 15000 == 0) stats.clear_old_room_stats(30000);
 
     // console.log("CPU used end: " + Game.cpu.getUsed());
+    stats.cpu_moving_mean();
 }
 
 /** // Uncomment after respawn to clear memory
