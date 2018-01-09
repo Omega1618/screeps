@@ -75,6 +75,7 @@ var clear_impl = function(room, queue) {
         if (transport_request_should_ignore(room, request)) {
             callback_util.del(request.start_callback);
             callback_util.del(request.end_callback);
+            delete room.memory[constants.TRANSPORT_REQUEST_TRACKER][request.id];
         } else {
             MultiQueue.enqueue(new_queue, priority, request);
         }
