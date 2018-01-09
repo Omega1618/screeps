@@ -67,6 +67,7 @@ var transport_request_should_ignore = function(room, request) {
 
 var clear_impl = function(room, queue) {
     var new_queue = MultiQueue.make();
+    var request_tracker = room.memory[constants.TRANSPORT_REQUEST_TRACKER];
     while (true) {
         var result = MultiQueue.dequeue_with_priority(queue);
         if (!result) return new_queue;
@@ -75,6 +76,7 @@ var clear_impl = function(room, queue) {
         if (transport_request_should_ignore(room, request)) {
             callback_util.del(request.start_callback);
             callback_util.del(request.end_callback);
+            if(request_tracker[request.id]) delete request_tracker[request.id];
         } else {
             MultiQueue.enqueue(new_queue, priority, request);
         }
