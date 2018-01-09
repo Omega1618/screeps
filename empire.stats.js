@@ -1,7 +1,8 @@
 // TODO may want to change the source locations stat to track which are in range of source keepers
 
 var empire_stat_names = {
-    LAST_UPDATE_TICK:0
+    LAST_UPDATE_TICK:0,
+    CPU_MOVING_MEAN: 'cpu_mm'
 };
 
 // TODO, consider adding a check for if the room had hostile creeps upon arrival, and record the owner(s).
@@ -110,8 +111,9 @@ var clear_old_room_stats = function (age) {
 
 var cpu_moving_mean = function() {
     var cpu_used = Game.cpu.getUsed();
-    Memory.cpu_moving_mean = (Memory.cpu_moving_mean | cpu_used) * 0.999 + 0.001 * cpu_used;
-    return Memory.cpu_moving_mean;
+    var cpu_mm = empire_stat_names.CPU_MOVING_MEAN;
+    Memory.stats[cpu_mm] = (Memory.stats[cpu_mm] || cpu_used) * 0.999 + 0.001 * cpu_used;
+    return Memory.stats[cpu_mm];
 };
 
 module.exports = {

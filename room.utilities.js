@@ -8,7 +8,7 @@ var spawn_creep_with_name = function(room, creep_module, energy) {
     });
     var spawner = spawners[0];
     
-    var creep_counter = Memory.creep_counter | 1;
+    var creep_counter = Memory.creep_counter || 1;
     var creep_name = creep_counter.toString();
     var creep_body = creep_module.suggested_body(energy);
     if(!creep_body) {
