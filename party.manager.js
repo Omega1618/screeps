@@ -68,7 +68,7 @@ var create_party = function(room, party_module_id) {
         return null;
     }
     // TODO Potential overflow error
-    var party_id = Memory.party_counter | 1;
+    var party_id = Memory.party_counter || 1;
     var party_memory = module.memory_init(room);
     if (!party_memory) {
         return null;
