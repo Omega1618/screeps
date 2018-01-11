@@ -353,3 +353,12 @@ Creep.prototype.travelToCachedPath = function () {
         return ERR_NOT_FOUND;
     }  
 };
+
+Creep.prototype.travelBetween = function (destination, target, to_destination) {
+    // Compute the path once, and only recompute when blocked for a long time
+    // If off path, do a simple move to
+    // Otherwise, keep track of the current position on the path
+    // TODO
+    // return this.moveTo(destination, options);
+    return ERR_INVALID_TARGET;
+};
