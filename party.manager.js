@@ -18,6 +18,7 @@ party_module_id_to_module[pe.CLAIM] = require('party.claim');
 party_module_id_to_module[pe.LONG_DISTANCE_MINE] = require('party.long_distance_mine');
 party_module_id_to_module[pe.TRANSPORT] = require('party.transport');
 party_module_id_to_module[pe.MINE_POWER] = require('party.mine_power');
+party_module_id_to_module[pe.HARASS] = require('party.harass.js');
 
 var get_module_from_id = function(party_id) {
     var party_memory = Memory.parties[party_id];
