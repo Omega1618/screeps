@@ -1,5 +1,3 @@
-// TODO, totally not done, also need to set up room data strctures
-
 /**
  *
  * Should try to target unguarded things like remote mining rooms and rooms without towers.
@@ -84,11 +82,15 @@ var run_harasser = function(party_memory, creep) {
     }
     
     if (!creep.memory.target) {
-        creep.memory.target = creep.room.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        creep.memory.target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if (!creep.memory.target) {
-                creep.memory.target = creep.room.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES);
+                creep.memory.target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES);
             }
-        if (creep.memory.target) creep.memory.target = creep.memory.target.id;
+        if (creep.memory.target) {
+            creep.memory.target = creep.memory.target.id;
+        } else {
+            party_memory.finished = true;
+        }
     }
     
     var target = creep.memory.target;
@@ -109,19 +111,24 @@ var run = function (party_memory) {
         return;
     }
     
+    var origin_room = Game.rooms[party_memory.origin_room_name];
+    if (!origin_room) {
+        party_memory.finished = true;
+        return;
+    }
+    
     // Spawn things we don't have
     if (!party_memory.harasser_name && party_util.can_help(origin_room) && origin_room.energyAvailable >= 620) {
-        var harasser_name = party_util.spawn_creep_get_name(origin_room, harasserRole, 750);
+        var harasser_name = party_util.spawn_creep_get_name(origin_room, harasserRole, 620);
         if (harasser_name) {
             party_memory.harasser_name = harasser_name;
-            var harasser = Game.creeps[harasser_name];
         }
     }
     
     if (party_memory.harasser_name) {
-        party_memory.harasser_name;
+        var harasser_name = party_memory.harasser_name;
         var harasser = Game.creeps[harasser_name];
-        run_harasser(harasser);
+        run_harasser(party_memory, harasser);
     }
 };
 
