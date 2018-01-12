@@ -17,10 +17,9 @@ role_id_to_module[re.PARTY_SCOUT] = require('party.creep.scout');
 role_id_to_module[re.PARTY_TRANSPORT] = require('party.creep.transport');
 role_id_to_module[re.PARTY_CLAIMER] = require('party.creep.claimer');
 role_id_to_module[re.PARTY_BUILDER] = require('party.creep.builder');
+role_id_to_module[re.PARTY_ABSTRACT] = require('party.creep.abstract');
 // party long distance mine creeps
 role_id_to_module[re.PARTY_LONG_DISTANCE_MINE_MINER] = require('party.long_distance_mine.creep.miner');
-// party defend creeps
-role_id_to_module[re.PARTY_DEFEND_MELEE_DEFENDER] = require('party.defend.creep.melee_defender');
 
 
 var run_creep = function(creep) {

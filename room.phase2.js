@@ -120,11 +120,19 @@ var try_party = function (room) {
     
     for (let flag_name in Game.flags) {
         var flag = Game.flags[flag_name];
-        if (flag.color == constants.CLAIM_COLOR && flag_name.split("_")[0] == room.name) {
-            var party_id = party_manager.create_party(room, pe.CLAIM);
-            if (party_id) {
-                party_data[pe.CLAIM].push(party_id);
-                return OK;
+        if (flag_name.split("_")[0] == room.name) {
+            if (flag.color == constants.CLAIM_COLOR) {
+                var party_id = party_manager.create_party(room, pe.CLAIM);
+                if (party_id) {
+                    party_data[pe.CLAIM].push(party_id);
+                    return OK;
+                }
+            } else if (flag.color == constants.HARASS_COLOR) {
+                var party_id = party_manager.create_party(room, pe.HARASS);
+                if (party_id) {
+                    party_data[pe.HARASS].push(party_id);
+                    return OK;
+                }
             }
         }
     }
