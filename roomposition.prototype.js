@@ -87,6 +87,26 @@ RoomPosition.prototype.isSteppable = function (includeCreeps = false) {
   return true
 }
 
+RoomPosition.prototype.getLink = function () {
+  if (this.__link) {
+    return this.__link
+  }
+  const room = Game.rooms[this.roomName]
+  if (!room) return false
+  var links = room.find(FIND_MY_STRUCTURES, {
+            filter: { structureType: STRUCTURE_LINK }
+        });
+  if (!links) return false
+  
+  const pos = this
+  const links = _.filter(links, a => pos.getRangeTo(a) <= 2)
+  if (links.length < 1) {
+    return false
+  }
+  this.__link = links[0]
+  return this.__link
+}
+
 RoomPosition.prototype.getMostOpenNeighbor = function () {
   const steppable = this.getSteppableAdjacent()
   let pos

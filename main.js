@@ -1,5 +1,9 @@
 // prototypes
 require('room.prototype');
+require('source.prototype');
+require('storage.prototype');
+require('terminal.prototype');
+
 require("Traveler");
 require('extend_lodash');
 
