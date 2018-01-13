@@ -84,7 +84,7 @@ var run_harasser = function(party_memory, creep) {
     if (!creep.memory.target) {
         creep.memory.target = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if (!creep.memory.target) {
-                creep.memory.target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES);
+                creep.memory.target = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {filter: a => a.structureType != STRUCTURE_CONTROLLER});
             }
         if (creep.memory.target) {
             creep.memory.target = creep.memory.target.id;
