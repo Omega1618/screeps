@@ -112,8 +112,13 @@ var clear_old_room_stats = function (age) {
 var cpu_moving_mean = function() {
     var cpu_used = Game.cpu.getUsed();
     var cpu_mm = empire_stat_names.CPU_MOVING_MEAN;
-    Memory.stats[cpu_mm] = (Memory.stats[cpu_mm] || cpu_used) * 0.999 + 0.001 * cpu_used;
-    return Memory.stats[cpu_mm];
+    var stats = Memory.stats;
+    if(!stats) {
+        Memory.stats = {};
+        stats = Memory.stats;
+    } 
+    stats[cpu_mm] = (stats[cpu_mm] || cpu_used) * 0.999 + 0.001 * cpu_used;
+    return stats[cpu_mm];
 };
 
 module.exports = {

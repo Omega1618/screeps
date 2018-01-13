@@ -119,7 +119,7 @@ var run = function (party_memory) {
     
     // Spawn things we don't have
     if (!party_memory.harasser_name && party_util.can_help(origin_room) && origin_room.energyAvailable >= 620) {
-        var harasser_name = party_util.spawn_creep_get_name(origin_room, harasserRole, 620);
+        var harasser_name = party_util.spawn_creep_get_name(origin_room, harasserRole, origin_room.energyAvailable);
         if (harasser_name) {
             party_memory.harasser_name = harasser_name;
         }

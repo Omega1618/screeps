@@ -124,7 +124,7 @@ var run =  function (party_memory) {
     // find closest target and attack
     // TODO later implement more advanced behavior.
     remove_dead_towers(party_memory);
-    if (party_memory.offense_parts > 0 || party_memory.healing_parts > 0) {
+    if (party_memory.total_hits > 0) {
         var tower = Game.getObjectById(party_memory.tower_ids[0]);
         var enemy_creeps = _.map(Object.keys(party_memory.enemy_creeps), function(creep_id) {return Game.getObjectById(creep_id);});
         var target = _.minBy(enemy_creeps, function (creep) {

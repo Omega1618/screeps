@@ -292,11 +292,14 @@ var run_room = function(room) {
     if (err_code == ERR_FULL) {
         try_party(room);
     }
+    /**
+    * We don't build any ramparts until RC6
     if (Game.time % 50 == 0 && room.controller.level >= 3) {
         // TODO, this may create a construction site.  Need to coordinate between building economic structures and building defense structures.
         // TODO also need to coordinate repair structures with repairing other things with the repairer.
         var defense_target = room_layout.get_next_defense_target(room.name);
     }
+    */
     if (Game.time % 10 == 0) {
         // TODO cache construction site
         if(room.find(FIND_CONSTRUCTION_SITES).length == 0) {
