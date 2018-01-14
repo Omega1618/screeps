@@ -84,7 +84,7 @@ var run = function(creep) {
     }
     
     var err_code = creep.harvest(source);
-    if(err_code == ERR_NOT_IN_RANGE) creep.travelTo(source);
+    if(err_code == ERR_NOT_IN_RANGE) creep.travelTo(source.getMiningPosition());
     
     var carry_amount = _.sum(creep.carry);
     if (err_code == OK && carry_amount >= creep.carryCapacity * 0.5) {

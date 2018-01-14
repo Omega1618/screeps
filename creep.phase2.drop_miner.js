@@ -68,7 +68,7 @@ var run = function(creep) {
     
     var err_code = creep.harvest(source);
     if(err_code == ERR_NOT_IN_RANGE) {
-        var err_code = creep.moveTo(source);
+        var err_code = creep.moveTo(source.getMiningPosition());
     }
     if (err_code == OK) {
         creep.memory.harvested += creep.memory.num_work * 2;
