@@ -180,12 +180,16 @@ var try_spawn = function(room) {
     
     var builder_outgoing_energy = room.memory[constants.STATIC_BUILDER_WORKER_PARTS] * BUILD_POWER;
     var upgrader_outgoing_energy = room.memory[constants.STATIC_UPGRADER_WORKER_PARTS] * UPGRADE_CONTROLLER_POWER;
+    var construction_exists = room.find(FIND_CONSTRUCTION_SITES).length > 0;
     
     var builder_output_percentage = 0.5;
     var upgrader_output_percentage = 0.5;
     if (room.controller.level < 3) {
         builder_output_percentage = 0.0;
         upgrader_output_percentage = 1.0;
+    } else if (!construction_exists) {
+        builder_output_percentage = 0.0;
+        upgrader_output_percentage = 0.75;
     }
     
     // Assume transport creeps are multiples of [MOVE, CARRY, CARRY], assume each trip is from source to sink and back with no stops
@@ -204,7 +208,7 @@ var try_spawn = function(room) {
     }
     
     // TODO cache construction cite
-    if (builder_outgoing_energy < incoming_energy * builder_output_percentage && room.find(FIND_CONSTRUCTION_SITES).length > 0) {
+    if (builder_outgoing_energy < incoming_energy * builder_output_percentage && construction_exists) {
         return util.spawn_creep(room, roleBuilder, ae);
     }
     
