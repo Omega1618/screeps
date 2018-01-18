@@ -122,3 +122,7 @@ module.exports.getHighestMineralValue = function (mineral) {
   }
   return this.highestValueMineral
 }
+
+module.exports.run_room_terminal = function (room) {
+    // TODO, will need to make the requests as well.
+}

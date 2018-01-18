@@ -5,7 +5,16 @@ var callback_util = require('utilities.call_back');
 
 var memory_init = function(room, creep_body) {
     var source = null;
-    var miner_tracker = room.memory[constants.MINER_TRACKER]; // TODO should add all safe sources and minerals
+    var miner_tracker = room.memory[constants.MINER_TRACKER];
+    // Make sure all energy sources are being harvested before harvesting minerals.
+    for (var source_id in miner_tracker) {
+        if (!miner_tracker[source_id]) {
+            var obj = Game.getObjectById(source_id);
+            if (obj.mineralType) continue;
+            source = source_id;
+            break;
+        }
+    }
     for (var source_id in miner_tracker) {
         if (!miner_tracker[source_id]) {
             source = source_id;
@@ -90,7 +99,7 @@ var run = function(creep) {
     if (err_code == OK && carry_amount >= creep.carryCapacity * 0.5) {
         var link = getlink(creep, source);
         
-        if (link) {
+        if (link && carry_amount > 0) {
             var err_code = creep.transfer(link, creep.memory.resource_type);
             if(err_code == ERR_NOT_IN_RANGE) creep.travelTo(link);
         } else {
