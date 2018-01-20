@@ -166,11 +166,25 @@ var try_spawn = function(room) {
         return util.spawn_creep(room, roleTransport, ae);
     }
     
-    if (ae < 550 && ac > ae) {
+    if (ae < 600 && ac > ae) {
         return ERR_NOT_ENOUGH_ENERGY;
     }
     
-    if (room.memory[constants.NUM_DROP_MINERS] <  room.memory[constants.SAFE_SOURCES].length) {
+    // TODO separate out the minerals from the sources
+    var need_miners = false;
+    if (room.memory[constants.NUM_DROP_MINERS] < room.memory[constants.NUM_SAFE_SOURCES]) {
+        var has_miner = room.memory[constants.MINER_TRACKER];
+        for(var source_id in has_miner) {
+            if (!has_miner[source_id]) {
+                var source = Game.getObjectById(source_id);
+                if (!source.mineralAmount || (source.mineralAmount > 0 && source.pos.lookFor(LOOK_STRUCTURES).length > 0)) {
+                    need_miners = true;
+                    break;
+                }
+            }
+        }
+    }
+    if (need_miners) {
         return util.spawn_creep(room, roleMiner, ae);
     }
     
@@ -296,6 +310,19 @@ var make_structure_energy_requests = function(room) {
     });
 };
 
+var get_source_and_sink_links = function(room) {
+    if (room.__source_and_sink_links_result) {
+        return room.__source_and_sink_links_result;
+    }
+    
+    var links = room.find(FIND_MY_STRUCTURES, {
+                filter: { structureType: STRUCTURE_LINK }
+            });
+    if (!links) return false
+    
+    // TODO
+}
+
 var create_link_requests = function(room) {
     // sinks vs sources, may want to save into room memory and delete when finished.
 };
@@ -303,11 +330,13 @@ var create_link_requests = function(room) {
 var manage_links = function(room) {
     // sinks vs sources, may want to save into room memory and delete when finished.
     // Minerals should always go to the storage link
+    create_link_requests(room);  
 };
  
 var run_room = function(room) {
-    manage_links(room);
-    create_link_requests(room);
+    if (Game.time % 2 == 0) {
+        manage_links(room); 
+    }
     
     var err_code = try_spawn(room);
     if (err_code == OK || Game.time % 10 == 0) {
