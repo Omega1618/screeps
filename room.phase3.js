@@ -302,6 +302,7 @@ var create_link_requests = function(room) {
 
 var manage_links = function(room) {
     // sinks vs sources, may want to save into room memory and delete when finished.
+    // Minerals should always go to the storage link
 };
  
 var run_room = function(room) {

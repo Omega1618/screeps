@@ -93,6 +93,8 @@ module.exports = {
     SPAWNER_REQUEST_PRIORITY: 0,
     TOWER_REQUEST_PRIORITY: 1,
     STATIC_UPGRADER_PRIORITY: 0,
+    // TODO make energy request priorities shared across all creeps of the same type (i.e. link and static upgrader)
+    // TODO make energy periorities scale with the number of work parts on the creep.
     STATIC_UPGRADER_REQUEST_ENERGY: 30,
     STATIC_BUILDER_PRIORITY: 0,
     STATIC_BUILDER_REQUEST_ENERGY: 200,
